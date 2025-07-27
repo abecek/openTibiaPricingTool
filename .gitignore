@@ -1,2 +1,5 @@
-./idea
-./vendor
+.idea/
+vendor/
+logs/
+*.log
+composer.lock
