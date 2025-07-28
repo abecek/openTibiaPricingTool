@@ -46,13 +46,15 @@ class UpdateDataCommand extends Command
         $outputFile = $input->getOption('output');
         $format = $input->getOption('format');
 
+        $outputFileName = $outputFile . '.' . $format;
+
         $logger = $this->getLogger($input);
 
         $urlBuilder = new UrlBuilder($logger);
         $fetcher = new TibiaWikiDataScrapper($logger);
         $updater = new TibiaItemDataUpdater(
             $inputFile,
-            $outputFile . '.' . $format,
+            $outputFileName,
             $format,
             $urlBuilder,
             $fetcher,
@@ -78,7 +80,7 @@ class UpdateDataCommand extends Command
 
             $progressBar->finish();
             $output->writeln("");
-            $output->writeln("<info>Data updated successfully. Output saved to: $outputFile</info>");
+            $output->writeln("<info>Data updated successfully. Output saved to: $outputFileName</info>");
 
             $failedUrls = $fetcher->getFailedUrls();
             foreach ($failedUrls as $url) {

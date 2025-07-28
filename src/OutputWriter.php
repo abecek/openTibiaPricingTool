@@ -99,6 +99,11 @@ class OutputWriter
             $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
 
+        // Apply auto-filter to first row (header)
+        $sheet->setAutoFilter(
+            $sheet->calculateWorksheetDimension()
+        );
+
         $writer = new Xlsx($spreadsheet);
         $writer->save($outputPath);
     }
