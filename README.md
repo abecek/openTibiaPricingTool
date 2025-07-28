@@ -72,7 +72,7 @@ id;name;Image;slotType;weaponType;Url;Level;Tibia Buy Price;Tibia Sell Price;...
 ```
 ├─ src/
 │   ├─ src/
-│       └─ Command/UpdatePricesCommand.php
+│       └─ Command/UpdateDataCommand.php
 │   ├─ TibiaItemPriceUpdater.php
 │   ├─ TibiaWikiDataScrapper.php
 │   ├─ UrlBuilder.php

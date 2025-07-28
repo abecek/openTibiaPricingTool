@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Throwable;
 
-class UpdatePricesCommand extends Command
+class UpdateDataCommand extends Command
 {
     protected static $defaultName = 'update-data';
 
