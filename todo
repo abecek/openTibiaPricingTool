@@ -1,2 +1,3 @@
-1. Add url for found items into excel output file
-2. Scrap also item images (reconsider placing them in separate output catalog or put them in the excel output file)
+1. <DONE> Add url for found items into excel output file (separate column)
+2. <DONE> Add scrapping for min level requirement
+3. Scrap also item images (reconsider placing them in separate output catalog or put them in the excel output file)

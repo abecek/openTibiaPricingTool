@@ -1,5 +1,6 @@
 .idea/
 vendor/
 logs/
+images/
 *.log
 composer.lock

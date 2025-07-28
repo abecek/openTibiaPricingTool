@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\TibiaItemPriceUpdater;
-use App\TibiaWikiPriceFetcher;
+use App\TibiaWikiDataScrapper;
+use App\UrlBuilder;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Level;
 use Monolog\Logger;
@@ -37,8 +38,9 @@ class UpdatePricesCommand extends Command
 
         $logger = $this->getLogger($input);
 
-        $fetcher = new TibiaWikiPriceFetcher($logger);
-        $updater = new TibiaItemPriceUpdater($inputFile, $outputFile, $fetcher, $logger);
+        $urlBuilder = new UrlBuilder($logger);
+        $fetcher = new TibiaWikiDataScrapper($logger);
+        $updater = new TibiaItemPriceUpdater($inputFile, $outputFile, $urlBuilder, $fetcher, $logger);
 
         try {
             if (!file_exists($inputFile)) {
