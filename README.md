@@ -32,7 +32,7 @@ composer install
 ## 🚀 Usage
 
 ```bash
-php console tibia:update-prices
+php console update-prices
 ```
 
 By default: `workCopyEquipment.csv` file is used as input and `workCopyEquipment_with_prices.csv` as output.
@@ -41,7 +41,7 @@ By default: `workCopyEquipment.csv` file is used as input and `workCopyEquipment
 You can also specify input/output, if needed:
 
 ```bash
-php console tibia:update-prices --input=items.csv --output=updated_items.csv
+php console update-prices --input=items.csv --output=updated_items.csv
 ```
 
 ---
@@ -51,7 +51,7 @@ php console tibia:update-prices --input=items.csv --output=updated_items.csv
 CSV file must contain the following headers:
 
 ```csv
-id;name;Tibia Buy Price;Tibia Sell Price
+id;name;Tibia Buy Price;Tibia Sell Price;Is Missing Tibia source
 ```
 
 Only the `name` column is used to match item names on TibiaWiki.

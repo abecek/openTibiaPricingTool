@@ -24,31 +24,46 @@ readonly class TibiaItemPriceUpdater
     }
 
     /**
+     * @param callable|null $onItemProcessed
      * @return void
      * @throws GuzzleException
      */
-    public function run(): void
+    public function run(?callable $onItemProcessed = null): void
     {
         $items = $this->readCsv();
         $header = array_keys($items[0]);
 
         foreach ($items as &$item) {
             $name = $item['name'] ?? '';
+            $this->logger->debug("Processing item: $name");
+
             if (!$name) {
                 $this->logger->warning('Item with missing name skipped.');
                 continue;
             }
 
             $prices = $this->priceFetcher->fetchPrices($name);
+            $this->logger->debug(sprintf(
+                "Fetched prices, sell: %s, buy: %s",
+                $prices['sell'] ?? 'null',
+                $prices['buy'] ?? 'null'
+            ));
             $item['Tibia Sell Price'] = $prices['sell'];
             $item['Tibia Buy Price'] = $prices['buy'];
+            if (isset($prices['failed'])) {
+                $item['Is Missing Tibia source'] = 1;
+            }
 
-            usleep(300000);
+            if ($onItemProcessed !== null) {
+                $onItemProcessed();
+            }
+
+            usleep(100000);
         }
         unset($item);
 
         $this->writeCsv($items, $header);
-        echo "Exported updated prices to {$this->outputFile}\n";
+        $this->logger->info(sprintf("Exported updated prices to: %s", $this->outputFile));
     }
 
     /**

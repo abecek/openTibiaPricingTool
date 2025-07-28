@@ -4,6 +4,6 @@ require __DIR__ . '/vendor/autoload.php';
 use Symfony\Component\Console\Application;
 use App\Command\UpdatePricesCommand;
 
-\$application = new Application('Tibia Fetch Prices Tool CLI', '1.0');
-\$application->add(new UpdatePricesCommand());
-\$application->run();
+$application = new Application('Tibia Fetch Prices Tool CLI', '1.0');
+$application->add(new UpdatePricesCommand());
+$application->run();

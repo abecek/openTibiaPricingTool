@@ -10,7 +10,7 @@ use Exception;
 use RuntimeException;
 use GuzzleHttp\Exception\GuzzleException;
 
-readonly class TibiaWikiPriceFetcher
+class TibiaWikiPriceFetcher
 {
     private const string INFO_PAGE_URL = 'https://tibia.fandom.com/wiki/';
     private Client $client;
@@ -20,7 +20,7 @@ readonly class TibiaWikiPriceFetcher
      * @param array $failedUrls
      */
     public function __construct(
-        private Logger $logger,
+        private readonly Logger $logger,
         private array $failedUrls = []
     ) {
         $this->client = new Client(['timeout' => 15]);
@@ -33,7 +33,8 @@ readonly class TibiaWikiPriceFetcher
      */
     public function fetchPrices(string $itemName): array
     {
-        $url = self::INFO_PAGE_URL . "/" . $this->getSlugName($itemName);
+        $url = self::INFO_PAGE_URL . $this->getSlugName($itemName);
+        $this->logger->debug("Reading from url: $url");
 
         try {
             $html = $this->fetchPage($url);
@@ -44,6 +45,7 @@ readonly class TibiaWikiPriceFetcher
 
             return ['sell' => $sell, 'buy' => $buy];
         } catch (Exception $e) {
+            $this->failedUrls[] = $url;
             $this->logger->warning(
                 sprintf(
                     "Failed to fetch prices for '%s', error: %s",
@@ -51,7 +53,7 @@ readonly class TibiaWikiPriceFetcher
                     $e->getMessage()
                 )
             );
-            return ['sell' => null, 'buy' => null];
+            return ['sell' => null, 'buy' => null, 'failed' => true];
         }
     }
 
@@ -96,15 +98,23 @@ readonly class TibiaWikiPriceFetcher
      */
     private function extractPriceRange(Crawler $crawler, string $label): ?string
     {
-        $xpath = "//span[text()='{$label}']/ancestor::h2/following-sibling::div[1]//tr";
-        $prices = $crawler->filterXPath($xpath)->each(function (Crawler $tr) {
-            $cols = $tr->filter('td')->each(fn(Crawler $td) => trim($td->text()));
-            return isset($cols[2]) && is_numeric(str_replace(',', '', $cols[2]))
-                ? (int)str_replace(',', '', $cols[2]) : null;
+        $prices = [];
+
+        $xpathId = $label === 'Sell To' ? 'npc-trade-sellto' : 'npc-trade-buyfrom';
+        $crawler->filterXPath("//*[@id='{$xpathId}']//table//tr")->each(function (Crawler $tr) use (&$prices) {
+            $tds = $tr->filter('td');
+            if ($tds->count() >= 3) {
+                $text = trim($tds->eq(2)->text());
+                $text = str_replace(',', '', $text);
+                if (is_numeric($text)) {
+                    $prices[] = (int)$text;
+                }
+            }
         });
 
-        $prices = array_filter($prices);
-        if (empty($prices)) return null;
+        if (empty($prices)) {
+            return null;
+        }
 
         $min = min($prices);
         $max = max($prices);
