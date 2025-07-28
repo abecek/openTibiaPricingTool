@@ -1,1 +1,36 @@
-id;name;Tibia Buy Price;Tibia Sell Price
+﻿id;name;Image;slotType;weaponType;Url;Level;Tibia Buy Price;Tibia Sell Price;Is Missing Tibia source;Buy;Sell;LootFrom;absorbPercentAll;absorbPercentDeath;absorbPercentEarth;absorbPercentEnergy;absorbPercentFire;absorbPercentHoly;absorbPercentIce;absorbPercentLifeDrain;absorbPercentManaDrain;absorbPercentPhysical;absorbPercentPoison;allowpickupable;ammoType;armor;attack;blockprojectile;charges;containerSize;corpseType;decayTo;defense;description;destroyTo;duration;effect;elementEarth;elementEnergy;elementFire;elementIce;extradef;femaleTransformTo;field;floorchange;fluidSource;fluidcontainer;forceSerialize;healthGain;healthTicks;hitChance;invisible;levelDoor;magiclevelpoints;maleTransformTo;manaGain;manaTicks;manashield;maxHitChance;maxTextLen;partnerDirection;range;readable;replaceable;rotateTo;runeSpellName;shootType;showattributes;showcharges;showcount;showduration;skillAxe;skillClub;skillDist;skillFist;skillShield;skillSword;speed;stopduration;suppressDrown;suppressDrunk;transformDeEquipTo;transformEquipTo;transformTo;type;weight;worth;writeOnceItemId;writeable
+2173;amulet of loss;;necklace;;;;;;;;;;;;;;;;;;;;;;;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;420;;;
+2175;spellbook;;;shield;;;;;;;;;;;;;;;;;;;;;;;;;;;;;14;It shows your spells and can also shield against attack when worn.;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;5800;;;
+2179;gold ring;;ring;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;100;;;
+2181;terra rod;;;wand;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Small stones are flying from its tip.;;;;;;;;;;;;;;;;;;;;;;;;;;;;3;;;;;smallearth;;;;;;;;;;;;;;;;;;;2500;;;
+2182;snakebite rod;;;wand;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;It seems to twitch and quiver as if trying to escape your grip.;;;;;;;;;;;;;;;;;;;;;;;;;;;;3;;;;;smallearth;;;;;;;;;;;;;;;;;;;4300;;;
+2342;helmet of the ancients;;head;;;;;;;;;;;;;;;;;;;;;;;12;;;;;;;;The gem of the helmet is burned out and should be replaced.;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2760;;;
+2343;helmet of the ancients;;head;;;;;;;;;;;;;;;;;;;;;;;16;;;;;;2342;;The gem is glowing with power.;;1800;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2760;;;
+2357;ring of wishes;;ring;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;90;;;
+2358;boots of waterwalking;;feet;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;800;;;
+2365;backpack of holding;;backpack;;;;;;;;;;;;;;;;;;;;;;;;;;;24;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1500;;;
+2376;sword;;;sword;;;;;;;;;;;;;;;;;;;;;;;14;;;;;;12;;;;;;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;3500;;;
+2377;two handed sword;;two-handed;sword;;;;;;;;;;;;;;;;;;;;;;;30;;;;;;25;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;7000;;;
+2378;battle axe;;two-handed;axe;;;;;;;;;;;;;;;;;;;;;;;25;;;;;;10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;5000;;;
+2379;dagger;;;sword;;;;;;;;;;;;;;;;;;;;;;;8;;;;;;6;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;950;;;
+2380;hand axe;;;axe;;;;;;;;;;;;;;;;;;;;;;;10;;;;;;5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1800;;;
+2381;halberd;;two-handed;axe;;;;;;;;;;;;;;;;;;;;;;;35;;;;;;14;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;9000;;;
+2382;club;;;club;;;;;;;;;;;;;;;;;;;;;;;7;;;;;;7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2500;;;
+2383;spike sword;;;sword;;;;;;;;;;;;;;;;;;;;;;;24;;;;;;21;;;;;;;;;2;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;5000;;;
+2384;rapier;;;sword;;;;;;;;;;;;;;;;;;;;;;;10;;;;;;8;;;;;;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1500;;;
+2385;sabre;;;sword;;;;;;;;;;;;;;;;;;;;;;;12;;;;;;10;;;;;;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2500;;;
+2386;axe;;;axe;;;;;;;;;;;;;;;;;;;;;;;12;;;;;;6;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;4000;;;
+2387;double axe;;two-handed;axe;;;;;;;;;;;;;;;;;;;;;;;35;;;;;;12;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;7000;;;
+2388;hatchet;;;axe;;;;;;;;;;;;;;;;;;;;;;;15;;;;;;8;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;3500;;;
+2389;spear;;;distance;;;;;;;;;;;;;;;;;;;;;;;25;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;5;;;;;spear;;;;;;;;;;;;;;;;;;;2000;;;
+2390;magic longsword;;two-handed;sword;;;;;;;;;;;;;;;;;;;;;;;55;;;;;;40;It is the magic Cyclopmania Sword.;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;4300;;;
+2391;war hammer;;two-handed;club;;;;;;;;;;;;;;;;;;;;;;;45;;;;;;10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8500;;;
+2392;fire sword;;;sword;;;;;;;;;;;;;;;;;;;;;;;35;;;;;;20;The blade is a magic flame.;;;;;;;;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2300;;;
+2393;giant sword;;two-handed;sword;;;;;;;;;;;;;;;;;;;;;;;46;;;;;;22;This sword has been forged by ancient giants.;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;18000;;;
+2394;morning star;;;club;;;;;;;;;;;;;;;;;;;;;;;25;;;;;;11;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;5400;;;
+2395;carlin sword;;;sword;;;;;;;;;;;;;;;;;;;;;;;15;;;;;;13;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;4000;;;
+2413;broadsword;;two-handed;sword;;;;;;;;;;;;;;;;;;;;;;;26;;;;;;23;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;5250;;;
+2414;dragon lance;;two-handed;axe;;;;;;;;;;;;;;;;;;;;;;;47;;;;;;16;The extraordinary sharp blade penetrates every armor.;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;6700;;;
+2415;great axe;;two-handed;axe;;;;;;;;;;;;;;;;;;;;;;;56;;;;;;26;A masterpiece of a dwarven smith.;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;9000;;;
+2416;crowbar;;;club;;;;;;;;;;;;;;;;;;;;;;;6;;;;;;6;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2100;;;
+2417;battle hammer;;;club;;;;;;;;;;;;;;;;;;;;;;;24;;;;;;14;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;6800;;;

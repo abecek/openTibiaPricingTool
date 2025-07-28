@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace App;
 
 use Monolog\Logger;
-use RuntimeException;
 use GuzzleHttp\Exception\GuzzleException;
 
-readonly class TibiaItemPriceUpdater
+readonly class TibiaItemDataUpdater
 {
     /**
      * @param string $inputFile
      * @param string $outputFile
+     * @param string $format
      * @param UrlBuilder $urlBuilder
      * @param TibiaWikiDataScrapper $dataScrapper
      * @param Logger $logger
@@ -19,6 +19,7 @@ readonly class TibiaItemPriceUpdater
     public function __construct(
         private string $inputFile,
         private string $outputFile,
+        private string $format,
         private UrlBuilder $urlBuilder,
         private TibiaWikiDataScrapper $dataScrapper,
         private Logger $logger
@@ -76,8 +77,10 @@ readonly class TibiaItemPriceUpdater
         }
         unset($item);
 
-        $this->writeCsv($items, $header);
-        $this->logger->info(sprintf("Exported updated prices to: %s", $this->outputFile));
+        $writer = new OutputWriter($this->format); // e.g. 'csv' or 'xlsx'
+        $writer->write($items, $this->outputFile);
+
+        $this->logger->info(sprintf("Exported updated data to: %s", $this->outputFile));
     }
 
     /**

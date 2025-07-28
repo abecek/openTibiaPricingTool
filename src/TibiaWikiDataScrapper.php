@@ -53,7 +53,7 @@ class TibiaWikiDataScrapper
             $this->failedUrls[] = $url;
             $this->logger->warning(
                 sprintf(
-                    "Failed to fetch prices for '%s', error: %s",
+                    "Failed to fetch data for '%s', error: %s",
                     $itemName,
                     $e->getMessage()
                 )

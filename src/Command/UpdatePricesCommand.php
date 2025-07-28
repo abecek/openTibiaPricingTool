@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\TibiaItemPriceUpdater;
+use App\TibiaItemDataUpdater;
 use App\TibiaWikiDataScrapper;
 use App\UrlBuilder;
 use Monolog\Formatter\FormatterInterface;
@@ -20,27 +20,44 @@ use Throwable;
 
 class UpdatePricesCommand extends Command
 {
-    protected static $defaultName = 'update-prices';
+    protected static $defaultName = 'update-data';
 
+    /**
+     * @return void
+     */
     protected function configure(): void
     {
         $this
-            ->setDescription('Fetches NPC buy/sell prices from TibiaWiki and updates a CSV file.')
+            ->setDescription('Fetches NPC buy/sell prices & additional data from TibiaWiki and updates a CSV file.')
             ->addOption('input', null, InputOption::VALUE_REQUIRED, 'Path to input CSV file', 'workCopyEquipment.csv')
-            ->addOption('output', null, InputOption::VALUE_REQUIRED, 'Path to output CSV file', 'workCopyEquipment_with_prices.csv')
+            ->addOption('output', null, InputOption::VALUE_REQUIRED, 'Output file name', 'workCopyEquipment_extended')
+            ->addOption('format', null, InputOption::VALUE_OPTIONAL, 'Output file format (csv or xlsx)', 'csv')
             ->addOption('debug', null, InputOption::VALUE_NONE, 'Enable debug logging to logs/debug.log');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $inputFile = $input->getOption('input');
         $outputFile = $input->getOption('output');
+        $format = $input->getOption('format');
 
         $logger = $this->getLogger($input);
 
         $urlBuilder = new UrlBuilder($logger);
         $fetcher = new TibiaWikiDataScrapper($logger);
-        $updater = new TibiaItemPriceUpdater($inputFile, $outputFile, $urlBuilder, $fetcher, $logger);
+        $updater = new TibiaItemDataUpdater(
+            $inputFile,
+            $outputFile . '.' . $format,
+            $format,
+            $urlBuilder,
+            $fetcher,
+            $logger
+        );
 
         try {
             if (!file_exists($inputFile)) {
@@ -61,7 +78,7 @@ class UpdatePricesCommand extends Command
 
             $progressBar->finish();
             $output->writeln("");
-            $output->writeln("<info>Prices updated successfully. Output saved to: $outputFile</info>");
+            $output->writeln("<info>Data updated successfully. Output saved to: $outputFile</info>");
 
             $failedUrls = $fetcher->getFailedUrls();
             foreach ($failedUrls as $url) {
@@ -72,7 +89,7 @@ class UpdatePricesCommand extends Command
             return Command::SUCCESS;
         } catch (Throwable $e) {
             $logger->error('Unexpected critical error: ' . $e->getMessage());
-            $output->writeln('<error>Failed to update prices. Check logs/error.log</error>');
+            $output->writeln('<error>Failed to update data. Check logs/error.log</error>');
 
             return Command::FAILURE;
         }
@@ -84,7 +101,7 @@ class UpdatePricesCommand extends Command
      */
     private function getLogger(InputInterface $input): Logger
     {
-        $logger = new Logger('tibia_prices');
+        $logger = new Logger('tibia_data');
         $logger->pushHandler(new StreamHandler('logs/error.log', Level::Warning));
         if ($input->getOption('debug')) {
             // Log to debug file
