@@ -3,19 +3,19 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\TibiaItemDataUpdater;
-use App\TibiaWikiDataScrapper;
-use App\UrlBuilder;
+use App\Scrapper\TibiaItemDataUpdater;
+use App\Scrapper\TibiaWikiDataScrapper;
+use App\Scrapper\UrlBuilder;
 use Monolog\Formatter\FormatterInterface;
+use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 use Monolog\LogRecord;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Throwable;
 
 class UpdateDataCommand extends Command
@@ -29,7 +29,7 @@ class UpdateDataCommand extends Command
     {
         $this
             ->setDescription('Fetches NPC buy/sell prices & additional data from TibiaWiki and updates a CSV file.')
-            ->addOption('input', null, InputOption::VALUE_REQUIRED, 'Path to input CSV file', 'workCopyEquipment.csv')
+            ->addOption('input', null, InputOption::VALUE_REQUIRED, 'Path to input CSV file', 'data/workCopyEquipment.csv')
             ->addOption('output', null, InputOption::VALUE_REQUIRED, 'Output file name', 'workCopyEquipment_extended')
             ->addOption('format', null, InputOption::VALUE_OPTIONAL, 'Output file format (csv or xlsx)', 'csv')
             ->addOption('debug', null, InputOption::VALUE_NONE, 'Enable debug logging to logs/debug.log');

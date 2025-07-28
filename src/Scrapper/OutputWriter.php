@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace App;
+namespace App\Scrapper;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class OutputWriter
 {

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App;
+namespace App\Scrapper;
 
-use Monolog\Logger;
 use GuzzleHttp\Exception\GuzzleException;
+use Monolog\Logger;
 
 readonly class TibiaItemDataUpdater
 {
@@ -73,7 +73,7 @@ readonly class TibiaItemDataUpdater
                 $onItemProcessed();
             }
 
-            usleep(150000);
+            usleep(300000);
         }
         unset($item);
 

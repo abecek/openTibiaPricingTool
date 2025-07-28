@@ -1,4 +1,4 @@
-# otItemsScrapper
+# Open Tibia Pricing Tool
 
 **Automated item data fetcher for TibiaWiki (Fandom)**  
 Fetches NPC buy/sell prices, required level, item images, and exports the result as CSV or XLSX.
@@ -82,7 +82,8 @@ id;name;Image;slotType;weaponType;Url;Level;Tibia Buy Price;Tibia Sell Price;...
 ├─ logs/
 │   ├─ error.log
 │   └─ debug.log
-└─ workCopyEquipment.csv  # Example input file
+└─ data/
+    └─ workCopyEquipment.csv  # Example input file
 ```
 
 ---

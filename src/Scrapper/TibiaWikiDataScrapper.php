@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace App;
+namespace App\Scrapper;
 
-use GuzzleHttp\Client;
-use Symfony\Component\DomCrawler\Crawler;
-use Monolog\Logger;
 use Exception;
-use RuntimeException;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Monolog\Logger;
+use RuntimeException;
+use Symfony\Component\DomCrawler\Crawler;
 
 class TibiaWikiDataScrapper
 {
