@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\SpawnAnalyzer;
 
-use DTO\City;
+use App\SpawnAnalyzer\DTO\City;
 
 class CityRegistry
 {

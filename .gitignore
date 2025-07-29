@@ -2,5 +2,6 @@
 vendor/
 logs/
 images/
+data/spawns/
 *.log
 composer.lock

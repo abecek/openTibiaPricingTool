@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace App\SpawnAnalyzer;
 
-use App\DTO\City;
-use App\DTO\SpawnEntry;
-use App\DTO\MonsterCount;
+use App\SpawnAnalyzer\DTO\MonsterCount;
 
 class MonsterProximityAnalyzer
 {
@@ -23,9 +21,9 @@ class MonsterProximityAnalyzer
         }
         foreach ($spawnEntries as $s) {
             foreach ($cities as $city) {
-                if ($s->getZ() !== $city->getZ()) {
-                    continue;
-                }
+//                if ($s->getZ() !== $city->getZ()) {
+//                    continue;
+//                }
                 $dx = $s->getX() - $city->getX();
                 $dy = $s->getY() - $city->getY();
                 if (($dx*$dx + $dy*$dy) <= ($radius * $radius)) {

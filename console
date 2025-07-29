@@ -1,11 +1,16 @@
+#!/usr/bin/env php
 <?php
+
 require __DIR__ . '/vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
 use App\Command\AnalyzeSpawnsCommand;
 use App\Command\UpdateDataCommand;
 
-$application = new Application('Tibia Fetch Data & Analyze Tool CLI', '1.0');
+$application = new Application('Tibia Data Tool CLI', '1.0');
+
+// Register commands
 $application->add(new AnalyzeSpawnsCommand());
 $application->add(new UpdateDataCommand());
+
 $application->run();
