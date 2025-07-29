@@ -23,7 +23,7 @@ class AnalyzeSpawnsCommand extends AbstractCommand
     {
         $this
             ->setDescription('Analyze monster spawns by proximity to cities')
-            ->addOption('spawn', null, InputOption::VALUE_REQUIRED, 'Path to spawn XML file')
+            ->addOption('spawnfile', null, InputOption::VALUE_REQUIRED, 'Path to spawn XML file')
             ->addOption('radius', null, InputOption::VALUE_REQUIRED, 'Radius in tiles', 100)
             ->addOption('debug', null, InputOption::VALUE_NONE, 'Enable debug logging to logs/debug.log');
     }
@@ -36,7 +36,7 @@ class AnalyzeSpawnsCommand extends AbstractCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $spawnPath = $input->getOption('spawn');
+        $spawnPath = $input->getOption('spawnfile');
         $radius = (int)$input->getOption('radius');
         if (!file_exists($spawnPath)) {
             $output->writeln("<error>Spawn file not found: $spawnPath</error>");
@@ -44,9 +44,13 @@ class AnalyzeSpawnsCommand extends AbstractCommand
         }
 
         $cities = CityRegistry::getCities([
-            ['city_name'=>'Sagvana','x'=>1299,'y'=>1553,'z'=>7],
-            // ... pozostałe miasta
+            ['city_name' => 'Sagvana', 'x' => 1299, 'y' => 1553, 'z' => 7],
+            ['city_name' => 'Estimar', 'x' => 1195, 'y' => 1031, 'z' => 7],
+            ['city_name' => 'Agren',   'x' => 1786, 'y' => 1313, 'z' => 7],
+            ['city_name' => 'Ohara',   'x' => 849,  'y' => 938,  'z' => 7],
+            ['city_name' => 'Sacrus',  'x' => 691,  'y' => 1146, 'z' => 7],
         ]);
+
 
         $logger = $this->getLogger($input, 'spawns');
         $parser = new SpawnParser($logger);
@@ -55,11 +59,19 @@ class AnalyzeSpawnsCommand extends AbstractCommand
         $analyzer = new MonsterProximityAnalyzer();
 
         $output->writeln("Loaded " . count($entries) . " spawn entries");
-        $counts = $analyzer->analyze($entries, $cities, $radius);
+        $results = $analyzer->analyze($entries, $cities, $radius);
+
+        usort($results, fn($a, $b) => [$a->getCity(), $a->getMonster()] <=> [$b->getCity(), $b->getMonster()]);
 
         $output->writeln("Monster count near each city (within {$radius} tiles):");
-        foreach ($counts as $mc) {
-            $output->writeln(sprintf("%s: %s → %d", $mc->getCity(), $mc->getMonster(), $mc->getCount()));
+
+        $currentCity = '';
+        foreach ($results as $entry) {
+            if ($entry->getCity() !== $currentCity) {
+                $currentCity = $entry->getCity();
+                $output->writeln(""); // przerwa między miastami
+            }
+            $output->writeln(sprintf("%s: %s → %d", $entry->getCity(), $entry->getMonster(), $entry->getCount()));
         }
 
         return Command::SUCCESS;
