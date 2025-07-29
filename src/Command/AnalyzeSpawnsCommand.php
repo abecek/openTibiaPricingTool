@@ -69,7 +69,7 @@ class AnalyzeSpawnsCommand extends AbstractCommand
         foreach ($results as $entry) {
             if ($entry->getCity() !== $currentCity) {
                 $currentCity = $entry->getCity();
-                $output->writeln(""); // przerwa między miastami
+                $output->writeln("");
             }
             $output->writeln(sprintf("%s: %s → %d", $entry->getCity(), $entry->getMonster(), $entry->getCount()));
         }
