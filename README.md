@@ -71,12 +71,13 @@ id;name;Image;slotType;weaponType;Url;Level;Tibia Buy Price;Tibia Sell Price;...
 
 ```
 ├─ src/
-│   ├─ src/
-│       └─ Command/UpdateDataCommand.php
-│   ├─ TibiaItemPriceUpdater.php
-│   ├─ TibiaWikiDataScrapper.php
-│   ├─ UrlBuilder.php
-│   ├─ OutputWriter.php
+│   ├─ Command/
+│        └─ UpdateDataCommand.php
+│   └─ Scrapper
+│        ├─ TibiaItemPriceUpdater.php
+│        ├─ TibiaWikiDataScrapper.php
+│        ├─ UrlBuilder.php
+│        └─ OutputWriter.php
 ├─ console             # CLI entrypoint
 ├─ images/             # Downloaded item icons (GIF)
 ├─ logs/
