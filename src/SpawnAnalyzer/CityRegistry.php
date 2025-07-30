@@ -16,7 +16,11 @@ class CityRegistry
         $cities = [];
         foreach ($definitions as $d) {
             $cities[] = new City(
-                $d['city_name'], (int)$d['x'], (int)$d['y'], (int)$d['z']
+                $d['city_name'],
+                $d['radius'],
+                (int)$d['x'],
+                (int)$d['y'],
+                (int)$d['z']
             );
         }
         return $cities;

@@ -5,17 +5,18 @@ namespace App\SpawnAnalyzer\DTO;
 
 class SpawnEntry
 {
-    private string $monster;
-    private int $x;
-    private int $y;
-    private int $z;
-
-    public function __construct(string $monster, int $x, int $y, int $z)
-    {
-        $this->monster = $monster;
-        $this->x = $x;
-        $this->y = $y;
-        $this->z = $z;
+    /**
+     * @param string $monster
+     * @param int $x
+     * @param int $y
+     * @param int $z
+     */
+    public function __construct(
+        private string $monster,
+        private int $x,
+        private int $y,
+        private int $z
+    ) {
     }
 
     public function getMonster(): string { return $this->monster; }
