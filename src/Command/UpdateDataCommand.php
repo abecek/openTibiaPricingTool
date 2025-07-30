@@ -15,7 +15,7 @@ use Throwable;
 
 class UpdateDataCommand extends AbstractCommand
 {
-    protected static $defaultName = 'update-data';
+    protected static $defaultName = 'update:data';
 
     /**
      * @return void

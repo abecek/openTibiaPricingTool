@@ -1,33 +1,43 @@
 # Open Tibia Pricing Tool
 
-**Automated item data fetcher for TibiaWiki (Fandom)**  
-Fetches NPC buy/sell prices, required level, item images, and exports the result as CSV or XLSX.
+**Automated item data fetcher + spawn analyzer for Open Tibia Server development.**  
+Fetches NPC buy/sell prices, required level, item images, and exports spawn monster density near cities for NPC pricing logic.
 
 ---
 
 ## 🚀 Features
 
-- Symfony Console CLI command: `tibia:update-data`
+### Item Data Scraper (`update:data`)
+- Symfony Console CLI command: `update:data`
+- Scrapes data from TibiaWiki for each item:
+  - **Buy/Sell Prices** from NPC trade tables
+  - **Required Level** from item sidebar
+  - **32x32 image icon** saved to `images/`
 - Options:
   - `--input` – path to input `.csv` file
-  - `--output` – output file path
-  - `--format` – either `csv` (default) or `xlsx`
-  - `--debug` – enables debug logging (to `logs/debug.log` and console output)
-- Parses input CSV with validation and BOM handling
-- For each item, scrapes data from TibiaWiki:
-  - **Buy/Sell Prices** from NPC trade table
-  - **Required Level** from infobox sidebar
-  - **32x32 image icon**, saved locally in `images/`
+  - `--output` – output path (without extension)
+  - `--format` – `csv` or `xlsx`
+  - `--debug` – enables debug logs (file + console)
 - Output generation:
-  - Supports CSV and **XLSX with embedded images**
-  - Automatically resizes columns to fit content
-  - Applies minimum row height for proper image rendering
+  - Supports **CSV** and **XLSX with embedded images**
+  - Auto-resized columns, adjusted row height
+
+### Spawn Analyzer (`analyze:spawns`)
+- Symfony Console CLI command: `analyze:spawns`
+- Parses spawn XML and assigns monster counts to closest city
+- Ignores Z-axis (2D proximity)
+- Per-city radius supported (`City::getRadius()`)
+- Options:
+  - `--spawnfile` – path to spawn `.xml` file
+  - `--output=csv` – enables CSV export to `data/output/spawn_analysis_output.csv`
+  - `--debug` – enables debug logs (file + console)
+- Output contains:
+  - `City`, `Radius`, `Monster`, `Count`
+- Uses accurate `centerx/centery` + offset `(x/y)` to calculate monster positions
 
 ---
 
 ## 📦 Installation
-
-Run in your project root:
 
 ```bash
 composer install
@@ -35,35 +45,33 @@ composer install
 
 ---
 
-## 🧪 Usage Example
+## 🧪 Usage Examples
+
+### Item Data Scraper
 
 ```bash
-php console update-data \
-  --input=data/input/workCopyEquipment.csv \
-  --output=data/output/workCopyEquipment_extended \
-  --format=xlsx \
-  --debug
+php console update:data   --input=data/input/workCopyEquipment.csv   --output=data/output/workCopyEquipment_extended   --format=xlsx   --debug
 ```
 
-- `--input`: path to input `.csv` file
-- `--output`: output file path without format
-- `--format`: `csv` or `xlsx` (default: csv)
-- `--debug`: enables detailed logging to file and console
+### Spawn Analyzer
+
+```bash
+php console analyze:spawns   --spawnfile=data/input/spawns/test3-860-spawn.xml   --output=csv   --debug
+```
 
 ---
 
-## 🧾 Input CSV Format
+## 🧾 Input CSV Format (for update:data)
 
 Input file must include a header row like:
 
 ```
-id;name;Image;slotType;weaponType;Url;Level;Tibia Buy Price;Tibia Sell Price;...
+id;name;Image;slotType;weaponType;Url;Level;Tibia Buy Price;Tibia Sell Price;Is Missing Tibia source;...
 ```
 
 - Separator: `;` (semicolon)
 - Required columns: `id`, `name`
 - Other columns are updated or appended
-- Invalid or incomplete rows are skipped with warnings
 
 ---
 
@@ -72,41 +80,37 @@ id;name;Image;slotType;weaponType;Url;Level;Tibia Buy Price;Tibia Sell Price;...
 ```
 ├─ src/
 │   ├─ Command/
-│        └─ UpdateDataCommand.php
-│   └─ Scrapper
-│        ├─ TibiaItemPriceUpdater.php
-│        ├─ TibiaWikiDataScrapper.php
-│        ├─ UrlBuilder.php
-│        └─ OutputWriter.php
-├─ console             # CLI entrypoint
-├─ images/             # Downloaded item icons (GIF)
+│   │    ├─ AbstractCommand.php
+│   │    ├─ UpdateDataCommand.php
+│   │    └─ AnalyzeSpawnsCommand.php
+│   ├─ Scrapper/
+│   │    ├─ TibiaItemDataUpdater.php
+│   │    ├─ TibiaWikiDataScrapper.php
+│   │    ├─ UrlBuilder.php
+│   │    └─ OutputWriter.php
+│   └─ SpawnAnalyzer/
+│        ├─ CityRegistry.php
+│        ├─ MonsterProximityAnalyzer.php
+│        ├─ SpawnParser.php
+│        ├─ Writer/
+│        │     └─ SpawnAnalysisCsvWriter.php
+│        └─ DTO/
+│              ├─ City.php
+│              ├─ MonsterCount.php
+│              └─ SpawnEntry.php
+├─ data/
+│   ├─ input/
+│   │    ├─ <your_items_xml ???>
+│   │    ├─ <your_items_csv_file>           
+│   │    └─ spawns/<your_spawn_file>
+│   └─ output/
+│        └─ <spawn_analysis_output.csv>
 ├─ logs/
-│   ├─ error.log
-│   └─ debug.log
-└─ data/
-    └─ workCopyEquipment.csv  # Example input file
+│   ├─ debug.log
+│   └─ error.log
+├─ images/
+└─ console
 ```
-
----
-
-## 💡 How It Works
-
-For each item:
-1. A slug URL is generated for TibiaWiki (e.g. `Two_Handed_Sword`)
-2. Data is scraped:
-   - Sell/Buy prices from the `npc-trade` section
-   - Required level from the sidebar
-   - Image from infobox
-3. All data is merged into the original row
-4. Result is saved to file
-
----
-
-## 📤 Output (.xlsx)
-
-- Columns auto-resize based on the longest cell value
-- Embedded icons (32×32) shown directly in cells
-- Row height adjusted for image visibility
 
 ---
 
@@ -115,28 +119,31 @@ For each item:
 Logs are stored in:
 
 ```
-logs/error.log   – Warnings, errors
-logs/debug.log   – Detailed logs if --debug is enabled
+logs/error.log   – Warnings, errors  
+logs/debug.log   – Detailed logs if --debug is enabled  
 ```
 
-When `--debug` is enabled, messages are also printed to the console with colors (INFO, WARNING, ERROR).
+When `--debug` is enabled:
+- Logs are written to file
+- Also printed to console with color formatting (INFO, WARNING, ERROR)
 
 ---
 
 ## 🧱 Under the Hood
 
-- Written in **PHP 8.3**
-- Follows **PSR-4 autoloading** with `App\` namespace
-- Input validation + fallback behavior
-- `OutputWriter` handles CSV/XLSX formatting and image rendering
+- PHP 8.3
+- Symfony Console
+- PSR-4 autoloading (`App\` namespace)
+- Robust DOM/XPath parsing with fallback handling
+- Modular design (Scrapper, Analyzer, Writer components)
 
 ---
 
 ## 🔧 Possible Enhancements
 
-- Result caching
-- Retry/backoff strategy on HTTP errors
-- Fallback to alternative data sources (e.g. Tibiopedia)
-- GUI wrapper
+- Export monster analysis to XLSX
+- Integration with monsters loots
+- Price suggestion engine per city
+- Web interface or dashboard
 
 ---
