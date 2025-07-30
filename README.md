@@ -50,13 +50,20 @@ composer install
 ### Item Data Scraper
 
 ```bash
-php console update:data   --input=data/input/workCopyEquipment.csv   --output=data/output/workCopyEquipment_extended   --format=xlsx   --debug
+php console update:data \
+  --input=data/input/workCopyEquipment.csv \
+  --output=data/output/workCopyEquipment_extended \
+  --format=xlsx \
+  --debug
 ```
 
 ### Spawn Analyzer
 
 ```bash
-php console analyze:spawns   --spawnfile=data/input/spawns/test3-860-spawn.xml   --output=csv   --debug
+php console analyze:spawns \
+  --spawnfile=data/input/spawns/test3-860-spawn.xml \
+  --output=csv \
+  --debug
 ```
 
 ---
