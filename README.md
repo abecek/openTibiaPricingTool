@@ -38,15 +38,15 @@ composer install
 ## 🧪 Usage Example
 
 ```bash
-php console tibia:update-prices \
-  --input=items.csv \
-  --output=updated_items.xlsx \
+php console update-data \
+  --input=data/input/workCopyEquipment.csv \
+  --output=data/output/workCopyEquipment_extended \
   --format=xlsx \
   --debug
 ```
 
 - `--input`: path to input `.csv` file
-- `--output`: output file path (CSV or XLSX)
+- `--output`: output file path without format
 - `--format`: `csv` or `xlsx` (default: csv)
 - `--debug`: enables detailed logging to file and console
 

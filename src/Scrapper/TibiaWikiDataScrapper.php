@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Scrapper;
 
+use Throwable;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -100,7 +101,14 @@ class TibiaWikiDataScrapper
         $prices = [];
 
         $xpathId = $label === 'Sell To' ? 'npc-trade-sellto' : 'npc-trade-buyfrom';
-        $crawler->filterXPath("//*[@id='{$xpathId}']//table//tr")->each(function (Crawler $tr) use (&$prices) {
+
+        try {
+            $rows = $crawler->filterXPath("//*[@id='{$xpathId}']//tr");
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        $rows->each(function (Crawler $tr) use (&$prices) {
             $tds = $tr->filter('td');
             if ($tds->count() >= 3) {
                 $text = trim($tds->eq(2)->text());
@@ -139,7 +147,7 @@ class TibiaWikiDataScrapper
                     return (int)$matches[0];
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->debug('Level requirement not found or failed to parse.');
         }
 
@@ -165,7 +173,7 @@ class TibiaWikiDataScrapper
 
                 return $res;
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->debug("Image not found or failed for slug: $slugName");
         }
 
@@ -197,7 +205,7 @@ class TibiaWikiDataScrapper
             }
 
             return $localPath;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->warning("Failed to download image from $url: " . $e->getMessage());
         }
 

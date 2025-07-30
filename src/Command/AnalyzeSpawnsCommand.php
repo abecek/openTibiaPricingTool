@@ -7,7 +7,6 @@ use App\SpawnAnalyzer\DTO\MonsterCount;
 use App\SpawnAnalyzer\SpawnParser;
 use App\SpawnAnalyzer\CityRegistry;
 use App\SpawnAnalyzer\MonsterProximityAnalyzer;
-use App\SpawnAnalyzer\Writer\SpawnAnalysisCsvWriter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;

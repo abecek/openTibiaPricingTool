@@ -54,9 +54,8 @@ readonly class TibiaItemDataUpdater
             $url = $this->urlBuilder->getUrl($name);
             $data = $this->dataScrapper->fetchData($id, $name, $url);
             $this->logger->debug(sprintf(
-                "Fetched prices, sell: %s, buy: %s",
-                $prices['sell'] ?? 'null',
-                $prices['buy'] ?? 'null'
+                "Fetched data: %s",
+                json_encode($data)
             ));
 
             if (isset($data['failed'])) {
