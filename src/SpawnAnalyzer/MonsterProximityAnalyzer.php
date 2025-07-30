@@ -6,16 +6,21 @@ namespace App\SpawnAnalyzer;
 use App\SpawnAnalyzer\DTO\City;
 use App\SpawnAnalyzer\DTO\MonsterCount;
 use App\SpawnAnalyzer\DTO\SpawnEntry;
+use App\SpawnAnalyzer\Writer\SpawnAnalysisCsvWriter;
 
 class MonsterProximityAnalyzer
 {
     /**
      * @param array $spawnEntries
      * @param array $cities
+     * @param string|null $outputFileName
      * @return array
      */
-    public function analyze(array $spawnEntries, array $cities): array
-    {
+    public function analyze(
+        array $spawnEntries,
+        array $cities,
+        ?string $outputFileName = null
+    ): array {
         $results = []; // cityName => [monsterName => count]
         foreach ($cities as $city) {
             $results[$city->getName()] = [];
@@ -52,6 +57,12 @@ class MonsterProximityAnalyzer
         }
 
         $this->sortResult($result);
+
+        if ($outputFileName) {
+            $writer = new SpawnAnalysisCsvWriter();
+            $writer->write($result, $outputFileName . '.csv');
+        }
+
         return $result;
     }
 

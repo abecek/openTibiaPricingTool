@@ -7,6 +7,7 @@ use App\SpawnAnalyzer\DTO\MonsterCount;
 use App\SpawnAnalyzer\SpawnParser;
 use App\SpawnAnalyzer\CityRegistry;
 use App\SpawnAnalyzer\MonsterProximityAnalyzer;
+use App\SpawnAnalyzer\Writer\SpawnAnalysisCsvWriter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,7 +26,8 @@ class AnalyzeSpawnsCommand extends AbstractCommand
         $this
             ->setDescription('Analyze monster spawns by proximity to cities')
             ->addOption('spawnfile', null, InputOption::VALUE_REQUIRED, 'Path to spawn XML file')
-            ->addOption('debug', null, InputOption::VALUE_NONE, 'Enable debug logging to logs/debug.log');
+            ->addOption('debug', null, InputOption::VALUE_NONE, 'Enable debug logging to logs/debug.log')
+            ->addOption('output', null, InputOption::VALUE_OPTIONAL, 'Output format (e.g. csv)', '');
     }
 
     /**
@@ -42,6 +44,11 @@ class AnalyzeSpawnsCommand extends AbstractCommand
             return Command::FAILURE;
         }
 
+        $outputFileName = null;
+        if ($input->getOption('output') === 'csv') {
+            $outputFileName = 'data/output/spawn_analysis_output';
+        }
+
         $cities = CityRegistry::getCities([
             ['city_name' => 'Sagvana', 'x' => 1299, 'y' => 1553, 'z' => 7, 'radius' => 200],
             ['city_name' => 'Estimar', 'x' => 1195, 'y' => 1031, 'z' => 7, 'radius' => 200],
@@ -56,7 +63,7 @@ class AnalyzeSpawnsCommand extends AbstractCommand
         $analyzer = new MonsterProximityAnalyzer();
 
         $output->writeln("Loaded " . count($entries) . " spawn entries");
-        $results = $analyzer->analyze($entries, $cities);
+        $results = $analyzer->analyze($entries, $cities, $outputFileName);
         $output->writeln("Monster count near each city:");
 
         $currentCity = '';

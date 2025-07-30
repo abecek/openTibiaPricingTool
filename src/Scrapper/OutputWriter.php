@@ -7,13 +7,13 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-class OutputWriter
+readonly class OutputWriter
 {
     /**
      * @param string $format
      */
     public function __construct(
-        private readonly string $format = 'csv'
+        private string $format = 'csv'
     ) {
     }
 

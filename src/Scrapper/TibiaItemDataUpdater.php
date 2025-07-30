@@ -34,7 +34,7 @@ readonly class TibiaItemDataUpdater
     public function run(?callable $onItemProcessed = null): void
     {
         $items = $this->readCsv();
-        $header = array_keys($items[0]);
+        //$header = array_keys($items[0]);
 
         foreach ($items as &$item) {
             $id = $item['id'] ?? '';
