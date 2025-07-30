@@ -3,6 +3,7 @@ vendor/
 logs/
 images/
 data/input/spawns/
+data/input/items.xml
 data/output/
 *.log
 composer.lock
