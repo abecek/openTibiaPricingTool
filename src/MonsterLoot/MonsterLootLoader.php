@@ -1,14 +1,24 @@
 <?php
+declare(strict_types=1);
 
 namespace App\MonsterLoot;
 
 use App\MonsterLoot\DTO\LootItem;
 use App\MonsterLoot\DTO\MonsterLoot;
+use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 use RuntimeException;
 
-class MonsterLootLoader
+readonly class MonsterLootLoader
 {
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function __construct(
+        private LoggerInterface $logger
+    ) {
+    }
+
     /**
      * @param string $basePath Path to the "monster" directory (e.g. /data/monsters/ or absolute full path)
      * @param string[] $monsterNames List of monster names to load
@@ -35,8 +45,14 @@ class MonsterLootLoader
                 continue;
             }
 
-            $monsterFile = $basePath . '/' . $map[$name];
+            $monsterFile = $this->normalizePathJoin($basePath, $map[$name]);
             if (!file_exists($monsterFile)) {
+                $this->logger->debug(
+                    sprintf(
+                        'Monster file: "%s" not found (relative path)',
+                        $monsterFile
+                    )
+                );
                 continue;
             }
 
@@ -75,4 +91,17 @@ class MonsterLootLoader
 
         return $items;
     }
+
+    /**
+     * Joins two path segments and normalizes all separators to DIRECTORY_SEPARATOR.
+     */
+    private function normalizePathJoin(string $base, string $relative): string
+    {
+        $base = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $base);
+        $relative = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $relative);
+
+        return rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR .
+            ltrim($relative, DIRECTORY_SEPARATOR);
+    }
+
 }

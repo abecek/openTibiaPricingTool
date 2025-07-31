@@ -44,7 +44,6 @@ class UpdateDataCommand extends AbstractCommand
         $outputFileName = $outputFile . '.' . $format;
 
         $logger = $this->getLogger($input, 'tibia_data');
-
         $urlBuilder = new UrlBuilder($logger);
         $fetcher = new TibiaWikiDataScrapper($logger);
         $updater = new TibiaItemDataUpdater(
