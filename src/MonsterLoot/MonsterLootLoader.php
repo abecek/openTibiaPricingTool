@@ -77,8 +77,9 @@ readonly class MonsterLootLoader
         $items = [];
 
         foreach ($lootNode->item as $item) {
-            $nameOrId = (string)($item['name'] ?? $item['id'] ?? 'unknown');
-            $chance = (int)($item['chance'] ?? 0);
+            $name = isset($item['name']) ? (string)$item['name'] : null;
+            $id = isset($item['id']) ? (int)$item['id'] : null;
+            $chance = isset($item['chance']) ? (int)$item['chance'] : 0;
             $countMax = isset($item['countmax']) ? (int)$item['countmax'] : null;
 
             $inside = [];
@@ -86,7 +87,13 @@ readonly class MonsterLootLoader
                 $inside = $this->parseLoot($item->inside);
             }
 
-            $items[] = new LootItem($nameOrId, $chance, $countMax, $inside);
+            $items[] = new LootItem(
+                $name,
+                $id,
+                $chance,
+                $countMax,
+                $inside
+            );
         }
 
         return $items;

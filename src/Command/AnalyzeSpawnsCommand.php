@@ -22,11 +22,27 @@ class AnalyzeSpawnsCommand extends AbstractCommand
      */
     protected function configure(): void
     {
-        $this
-            ->setDescription('Analyze monster spawns by proximity to cities')
-            ->addOption('spawnfile', null, InputOption::VALUE_REQUIRED, 'Path to spawn XML file')
-            ->addOption('debug', null, InputOption::VALUE_NONE, 'Enable debug logging to logs/debug.log')
-            ->addOption('output', null, InputOption::VALUE_OPTIONAL, 'Output format (e.g. csv)', '');
+        $this->setDescription(
+            'Analyze monster spawns by proximity to cities'
+            )->addOption(
+                'spawnfile',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Path to spawn XML file'
+            )
+            ->addOption(
+                'debug',
+                null,
+                InputOption::VALUE_NONE,
+                'Enable debug logging to logs/debug.log'
+            )
+            ->addOption(
+                'output',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Output format (e.g. csv)',
+                ''
+            );
     }
 
     /**

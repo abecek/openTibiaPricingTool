@@ -22,12 +22,35 @@ class UpdateDataCommand extends AbstractCommand
      */
     protected function configure(): void
     {
-        $this
-            ->setDescription('Fetches NPC buy/sell prices & additional data from TibiaWiki and updates a CSV file.')
-            ->addOption('input', null, InputOption::VALUE_REQUIRED, 'Path to input CSV file', 'data/input/workCopyEquipment.csv')
-            ->addOption('output', null, InputOption::VALUE_REQUIRED, 'Output file name', 'data/output/workCopyEquipment_extended')
-            ->addOption('format', null, InputOption::VALUE_OPTIONAL, 'Output file format (csv or xlsx)', 'csv')
-            ->addOption('debug', null, InputOption::VALUE_NONE, 'Enable debug logging to logs/debug.log');
+        $this->setDescription(
+            'Fetches NPC buy/sell prices & additional data from TibiaWiki and updates a CSV file.'
+            )->addOption(
+                'input',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Path to input CSV file',
+                'data/input/workCopyEquipment.csv'
+            )
+            ->addOption(
+                'output',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Output file name',
+                'data/output/workCopyEquipment_extended'
+            )
+            ->addOption(
+                'format',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Output file format (csv or xlsx)',
+                'csv'
+            )
+            ->addOption(
+                'debug',
+                null,
+                InputOption::VALUE_NONE,
+                'Enable debug logging to logs/debug.log'
+            );
     }
 
     /**

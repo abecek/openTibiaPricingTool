@@ -3,26 +3,38 @@ declare(strict_types=1);
 
 namespace App\MonsterLoot\DTO;
 
-class LootItem
+readonly class LootItem
 {
     /**
-     * @param string $nameOrId
+     * @param string|null $name
+     * @param int|null $id
      * @param int $chance
      * @param int|null $countMax
-     * @param array $inside
+     * @param array|null $inside
      */
     public function __construct(
-        private readonly string $nameOrId,
-        private readonly int $chance,
-        private readonly ?int $countMax = null,
-        private readonly array $inside = []
+        private ?string $name,
+        private ?int $id,
+        private int $chance,
+        private ?int $countMax = null,
+        private ?array $inside = []
     ) {
     }
 
     /**
+     * @return string|null
+     */
+    public function getName(): ?string{ return $this->name; }
+
+    /**
+     * @return int|null
+     */
+    public function getId(): ?int{ return $this->id; }
+
+    /**
      * @return string
      */
-    public function getNameOrId(): string { return $this->nameOrId; }
+    public function getNameOrId(): string { return $this->name ?? (string) $this->id; }
 
     /**
      * @return int
@@ -35,7 +47,7 @@ class LootItem
     public function getCountMax(): ?int { return $this->countMax; }
 
     /**
-     * @return LootItem[]
+     * @return LootItem[]|null
      */
-    public function getInside(): array { return $this->inside; }
+    public function getInside(): ?array { return $this->inside; }
 }

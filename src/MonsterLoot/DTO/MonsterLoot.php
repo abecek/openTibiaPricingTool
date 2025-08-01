@@ -3,15 +3,15 @@ declare(strict_types=1);
 
 namespace App\MonsterLoot\DTO;
 
-class MonsterLoot
+readonly class MonsterLoot
 {
     /**
      * @param string $monsterName
      * @param array $items
      */
     public function __construct(
-        private readonly string $monsterName,
-        private readonly array $items
+        private string $monsterName,
+        private array  $items
     ) {
 
     }
