@@ -99,8 +99,15 @@ php console monster:load-loot \
 ```
 
 E.g.
+```bash
+php console monster:load-loot \
+  --monster-dir="C:\otsDev\TFS-1.5-Downgrades-8.60-upgrade\data\monster"  
 ```
-php console monster:load-loot --monster-dir="C:\otsDev\TFS-1.5-Downgrades-8.60-upgrade\data\monster"  
+
+```bash
+php console monster:load-loot \
+  --monster-dir="C:\otsDev\TFS-1.5-Downgrades-8.60-upgrade\data\monster" \
+  --loot-output="data/output/monster_loot_output.csv"
 ```
 
 ---

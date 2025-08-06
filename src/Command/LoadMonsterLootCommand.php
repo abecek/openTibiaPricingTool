@@ -7,6 +7,7 @@ use App\Item\ItemLookupService;
 use App\MonsterLoot\DTO\LootItem;
 use App\MonsterLoot\MonsterLootLoader;
 use App\MonsterLoot\SpawnLootIntegrator;
+use App\MonsterLoot\Writer\MonsterLootCsvWriter;
 use App\SpawnAnalyzer\SpawnCsvReader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -37,6 +38,13 @@ class LoadMonsterLootCommand extends AbstractCommand
                 'data/output/spawn_analysis_output.csv'
             )
             ->addOption(
+                'loot-output',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Optional path to save output CSV with loot data',
+                'data/output/monster_loot_output.csv'
+            )
+            ->addOption(
                 'debug',
                 null,
                 InputOption::VALUE_NONE,
@@ -55,6 +63,7 @@ class LoadMonsterLootCommand extends AbstractCommand
 
         $monsterDir = $input->getOption('monster-dir');
         $csvPath = $input->getOption('spawn-csv');
+        $lootOutput = $input->getOption('loot-output');
 
         if (!$monsterDir || !is_dir($monsterDir)) {
             $logger->error("Invalid or missing monster directory.");
@@ -93,6 +102,12 @@ class LoadMonsterLootCommand extends AbstractCommand
                     $this->printLootItem($output, $item, $itemLookup);
                 }
             }
+        }
+
+        if ($lootOutput) {
+            $writer = new MonsterLootCsvWriter($itemLookup);
+            $writer->write($result, $lootOutput);
+            $output->writeln("<info>Exported loot data to file: $lootOutput</info>");
         }
 
         return Command::SUCCESS;
