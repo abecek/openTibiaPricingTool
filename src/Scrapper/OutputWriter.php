@@ -46,7 +46,7 @@ readonly class OutputWriter
         $fp = fopen($outputPath, 'w');
 
         if (!$fp) {
-            throw new \RuntimeException("Unable to open file for writing: " . $outputPath);
+            throw new RuntimeException("Unable to open file for writing: " . $outputPath);
         }
 
         // Write headers

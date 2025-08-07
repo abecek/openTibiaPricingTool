@@ -110,6 +110,13 @@ php console monster:load-loot \
   --loot-output="data/output/monster_loot_output.csv"
 ```
 
+### Custom Price Suggester
+```bash
+php console suggest:prices \
+  --format=xlsx \
+  --debug 
+```
+
 ---
 
 ## 🧾 Input CSV Format (for update:data)
