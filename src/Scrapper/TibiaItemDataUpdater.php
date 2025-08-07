@@ -5,6 +5,7 @@ namespace App\Scrapper;
 
 use GuzzleHttp\Exception\GuzzleException;
 use Monolog\Logger;
+use RuntimeException;
 
 readonly class TibiaItemDataUpdater
 {
@@ -91,18 +92,18 @@ readonly class TibiaItemDataUpdater
     private function readCsv(): array
     {
         if (!file_exists($this->inputFile)) {
-            throw new \RuntimeException("File {$this->inputFile} not found.");
+            throw new RuntimeException("File {$this->inputFile} not found.");
         }
 
         $rows = [];
         if (($h = fopen($this->inputFile, 'r')) === false) {
-            throw new \RuntimeException("Could not open CSV for reading.");
+            throw new RuntimeException("Could not open CSV for reading.");
         }
 
         $header = fgetcsv($h, 0, ';');
         if (!$header) {
             fclose($h);
-            throw new \RuntimeException("CSV header is missing or unreadable.");
+            throw new RuntimeException("CSV header is missing or unreadable.");
         }
 
         // Remove BOM if present
@@ -136,26 +137,5 @@ readonly class TibiaItemDataUpdater
 
         fclose($h);
         return $rows;
-    }
-
-    /**
-     * @param array $rows
-     * @param array $header
-     * @return void
-     */
-    private function writeCsv(array $rows, array $header): void
-    {
-        $h = fopen($this->outputFile, 'w');
-        fputcsv($h, $header, ';');
-
-        foreach ($rows as $row) {
-            $line = [];
-            foreach ($header as $key) {
-                $line[] = $row[$key] ?? '';
-            }
-            fputcsv($h, $line, ';');
-        }
-
-        fclose($h);
     }
 }

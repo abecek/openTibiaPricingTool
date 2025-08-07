@@ -90,7 +90,7 @@ class SuggestPricesCommand extends AbstractCommand
         if (!$handle) {
             throw new RuntimeException("Unable to write to CSV file: " . $equipmentCsv);
         }
-        
+
         if (!empty($updatedRows)) {
             fputcsv($handle, array_keys($updatedRows[0]), ';');
             foreach ($updatedRows as $row) {
