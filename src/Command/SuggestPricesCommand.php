@@ -5,6 +5,7 @@ namespace App\Command;
 
 use App\MonsterLoot\MonsterLootCsvReader;
 use App\Pricing\PriceSuggestionEngine;
+use App\Pricing\TibiaPriceProvider;
 use App\SpawnAnalyzer\SpawnCsvReader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,10 +56,11 @@ class SuggestPricesCommand extends AbstractCommand
         $spawnReader = new SpawnCsvReader();
         $lootReader = new MonsterLootCsvReader();
 
+        $priceProvider = new TibiaPriceProvider('data/output/workCopyEquipment_extended.csv'); // todo change to option
         $spawnData = $spawnReader->read($spawnCsv);
         $lootData = $lootReader->read($lootCsv);
 
-        $engine = new PriceSuggestionEngine();
+        $engine = new PriceSuggestionEngine($priceProvider);
         $suggestions = $engine->suggestPrices($spawnData, $lootData);
 
         foreach ($suggestions as $item => $data) {

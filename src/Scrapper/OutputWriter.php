@@ -6,6 +6,7 @@ namespace App\Scrapper;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use RuntimeException;
 
 readonly class OutputWriter
 {
@@ -27,7 +28,7 @@ readonly class OutputWriter
     public function write(array $items, string $outputPath): void
     {
         if (empty($items)) {
-            throw new \RuntimeException("No data to write.");
+            throw new RuntimeException("No data to write.");
         }
 
         if ($this->format === 'xlsx') {

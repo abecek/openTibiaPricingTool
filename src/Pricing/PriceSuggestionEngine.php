@@ -10,9 +10,17 @@ use App\SpawnAnalyzer\DTO\MonsterCount;
 readonly class PriceSuggestionEngine
 {
     /**
+     * @param TibiaPriceProvider $priceProvider
+     */
+    public function __construct(
+        private TibiaPriceProvider $priceProvider
+    ) {
+    }
+
+    /**
      * @param MonsterCount[] $spawnData
-     * @param array<string, array<string, MonsterLoot>> $lootData [city => [monster => MonsterLoot]]
-     * @return array<string, array<string, array{buy: int, sell: int}>> [itemName => [city => ['buy' => x, 'sell' => y]]]
+     * @param array<string, array<string, MonsterLoot>> $lootData
+     * @return array<string, array<string, array{buy: int, sell: int}>>
      */
     public function suggestPrices(array $spawnData, array $lootData): array
     {
@@ -27,30 +35,27 @@ readonly class PriceSuggestionEngine
                 continue;
             }
 
-            /** @var MonsterLoot $loot */
             $loot = $lootData[$city][$monster];
 
             foreach ($loot->getAllItemsRecursive() as $item) {
-                if (!$item instanceof LootItem) {
+                if (!$item instanceof LootItem || !$item->getId()) {
                     continue;
                 }
 
-                $itemName = $item->getName();
-                if (!$itemName) {
-                    continue; // Skip if item name is still missing
-                }
+                $id = $item->getId();
+                $itemName = $item->getName() ?? "Item #{$id}";
 
-                // Basic heuristic: price = (chance * countMax) * spawnCount * K
                 $chance = $item->getChance();
                 $countMax = $item->getCountMax() ?? 1;
                 $baseValue = intval(($chance / 100000) * $countMax * $count);
 
-                if (!isset($result[$itemName][$city])) {
-                    $result[$itemName][$city] = ['buy' => 0, 'sell' => 0];
+                $official = $this->priceProvider->getById($id);
+                if ($official && $official['sell']) {
+                    $baseValue = min($baseValue, $official['sell']);
                 }
 
-                $result[$itemName][$city]['buy'] += $baseValue;
-                $result[$itemName][$city]['sell'] += (int) round($baseValue * 0.5);
+                $result[$itemName][$city]['buy'] = ($result[$itemName][$city]['buy'] ?? 0) + $baseValue;
+                $result[$itemName][$city]['sell'] = ($result[$itemName][$city]['sell'] ?? 0) + (int) round($baseValue * 0.5);
             }
         }
 
