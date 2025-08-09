@@ -8,6 +8,7 @@ use App\Command\AnalyzeSpawnsCommand;
 use App\Command\UpdateDataCommand;
 use App\Command\LoadMonsterLootCommand;
 use App\Command\SuggestPricesCommand;
+use App\Command\GenerateMerchantItemsCommand;
 
 $application = new Application('Tibia Data Tool CLI', '1.0');
 
@@ -16,5 +17,6 @@ $application->add(new AnalyzeSpawnsCommand());
 $application->add(new UpdateDataCommand());
 $application->add(new LoadMonsterLootCommand());
 $application->add(new SuggestPricesCommand());
+$application->add(new GenerateMerchantItemsCommand());
 
 $application->run();

@@ -118,6 +118,43 @@ php console suggest:prices \
   --debug 
 ```
 
+### Npc Merchant System Data Populator
+
+# CSV
+```bash
+php console merchant:generate-items \
+  --equipment-file=data/output/workCopyEquipment_extended.csv \
+  --format=csv \
+  --dst-dir=data/lib/core/customs/merchant/items \
+  --include-tibia-lists
+```
+
+# XLSX
+```bash
+php console merchant:generate-items \
+  --equipment-file=data/output/workCopyEquipment_extended.xlsx \
+  --format=xlsx \
+  --dst-dir=data/lib/core/customs/merchant/items
+```
+
+E.g.
+```bash
+php console merchant:generate-items \
+  --equipment-file=data/output/workCopyEquipment_extended.csv \
+  --format=csv \
+  --dst-dir="C:\otsDev\TFS-1.5-Downgrades-8.60-upgrade\data\lib\core\customs\merchant\items" \
+  --debug
+```
+
+```bash
+php console merchant:generate-items \
+  --equipment-file=data/output/workCopyEquipment_extended.xlsx \
+  --format=xlsx \
+  --dst-dir="C:\otsDev\TFS-1.5-Downgrades-8.60-upgrade\data\lib\core\customs\merchant\items" \
+  --debug
+```
+
+
 ---
 
 ## 🧾 Input CSV Format (for update:data)

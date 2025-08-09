@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 
 readonly class PriceSuggestionEngine
 {
-    private const array EXCLUDED_NPCS = ['Rashid'];
+    private const array EXCLUDED_NPCS = ['Rashid', 'H.L.'];
 
     /**
      * @param LoggerInterface $logger
