@@ -103,7 +103,7 @@ E.g.
 php console monster:load-loot \
   --monster-dir="C:\otsDev\TFS-1.5-Downgrades-8.60-upgrade\data\monster"  
 ```
-
+E.g. 2
 ```bash
 php console monster:load-loot \
   --monster-dir="C:\otsDev\TFS-1.5-Downgrades-8.60-upgrade\data\monster" \
@@ -111,6 +111,7 @@ php console monster:load-loot \
 ```
 
 ### Custom Price Suggester
+
 ```bash
 php console suggest:prices \
   --format=xlsx \

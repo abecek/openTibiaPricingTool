@@ -6,15 +6,14 @@ namespace App\Command;
 use App\MonsterLoot\MonsterLootCsvReader;
 use App\Pricing\EquipmentCsvReader;
 use App\Pricing\EquipmentXlsxReader;
-use App\Pricing\EquipmentXlsxWriter;
+use App\Pricing\EquipmentXlsxUpdater;
 use App\Pricing\PriceSuggestionEngine;
 use App\SpawnAnalyzer\SpawnCsvReader;
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use RuntimeException;
-use InvalidArgumentException;
 
 class SuggestPricesCommand extends AbstractCommand
 {
@@ -66,29 +65,31 @@ class SuggestPricesCommand extends AbstractCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $equipmentPath = $input->getOption('equipment-file');
-        $equipmentFormat = strtolower((string)$input->getOption('format'));
-        $equipmentPath .= '.' . $equipmentFormat;
+        $equipmentFile = $input->getOption('equipment-file');
         $lootCsv = $input->getOption('loot-csv');
         $spawnCsv = $input->getOption('spawn-csv');
+        $format = strtolower($input->getOption('format'));
+        $equipmentPath = $equipmentFile . '.' . $format;
 
-        if (!in_array($equipmentFormat, ['csv', 'xlsx'])) {
-            throw new InvalidArgumentException("Invalid format: $equipmentFormat. Use csv or xlsx.");
-        }
-
+        // Load data
         $lootReader = new MonsterLootCsvReader();
         $spawnReader = new SpawnCsvReader();
-        $equipmentReader = $equipmentFormat === 'xlsx'
-            ? new EquipmentXlsxReader()
-            : new EquipmentCsvReader();
+
+        if ($format === 'xlsx' || str_ends_with(strtolower($equipmentPath), '.xlsx')) {
+            $equipmentReader = new EquipmentXlsxReader();
+        } else {
+            $equipmentReader = new EquipmentCsvReader();
+        }
 
         $lootData = $lootReader->read($lootCsv);
         $spawnData = $spawnReader->read($spawnCsv);
         $equipmentData = $equipmentReader->read($equipmentPath);
 
+        // Generate price suggestions
         $engine = new PriceSuggestionEngine();
         $suggestions = $engine->suggestPrices($spawnData, $equipmentData, $lootData);
 
+        // Update rows
         $updatedRows = [];
         foreach ($equipmentData as $row) {
             $itemName = strtolower(trim($row['name'] ?? ''));
@@ -110,13 +111,16 @@ class SuggestPricesCommand extends AbstractCommand
             $updatedRows[] = $row;
         }
 
-        if ($equipmentFormat === 'xlsx') {
-            $writer = new EquipmentXlsxWriter();
-            $writer->write($equipmentPath, $updatedRows);
+        // Save results
+        if (str_ends_with(strtolower($equipmentPath), '.xlsx')) {
+            $xlsxUpdater = new EquipmentXlsxUpdater();
+            $xlsxUpdater->updateBuySellColumns($equipmentPath, $suggestions);
+            $output->writeln('<info>XLSX updated in-place, preserving images and formatting.</info>');
+            return Command::SUCCESS;
         } else {
             $handle = fopen($equipmentPath, 'w');
             if (!$handle) {
-                throw new RuntimeException("Unable to write to CSV file: $equipmentPath");
+                throw new RuntimeException("Unable to write to CSV file: " . $equipmentPath);
             }
 
             if (!empty($updatedRows)) {
@@ -125,12 +129,11 @@ class SuggestPricesCommand extends AbstractCommand
                     fputcsv($handle, $row, ';');
                 }
             }
-
             fclose($handle);
+
+            $output->writeln('<info>CSV updated with suggested prices.</info>');
         }
 
-        $output->writeln('<info>Equipment file updated with suggested prices.</info>');
-        
         return Command::SUCCESS;
     }
 }

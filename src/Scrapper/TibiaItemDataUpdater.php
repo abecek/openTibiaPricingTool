@@ -9,6 +9,8 @@ use RuntimeException;
 
 readonly class TibiaItemDataUpdater
 {
+    private const int SLEEP_TIME_MICRO_SECS = 100000;
+
     /**
      * @param string $inputFile
      * @param string $outputFile
@@ -73,7 +75,7 @@ readonly class TibiaItemDataUpdater
                 $onItemProcessed();
             }
 
-            usleep(300000);
+            usleep(self::SLEEP_TIME_MICRO_SECS);
         }
         unset($item);
 

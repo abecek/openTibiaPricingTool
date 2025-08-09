@@ -34,7 +34,17 @@ readonly class PriceSuggestionEngine
 
             $result[$itemName] = [];
 
+            // BEFORE city loop (for current CSV row):
+            $buyPerCityJson  = $this->parseCityPriceJson($row['Tibia Buy Price']  ?? null);
+            $sellPerCityJson = $this->parseCityPriceJson($row['Tibia Sell Price'] ?? null);
+
+            $scalarBaseBuy  = $this->parsePriceFieldFlexible($row['Tibia Buy Price'] ?? null);
+            $scalarBaseSell = $this->parsePriceFieldFlexible($row['Tibia Sell Price'] ?? null);
             foreach ($cityMonsterCounts as $city => $monsters) {
+                // resolve baseline per city using JSON->dominant with scalar fallback
+                $baseBuy  = $this->getBaselinePriceForCity($buyPerCityJson,  $city, 'buy',  $scalarBaseBuy);
+                $baseSell = $this->getBaselinePriceForCity($sellPerCityJson, $city, 'sell', $scalarBaseSell);
+
                 $totalChance = 0;
                 $lootOccurrences = 0;
 
@@ -52,39 +62,28 @@ readonly class PriceSuggestionEngine
                     }
                 }
 
-                $baseBuy = $this->parsePriceField($row['Tibia Buy Price'] ?? null);
-                $baseSell = $this->parsePriceField($row['Tibia Sell Price'] ?? null);
                 if ($lootOccurrences > 0) {
-                    // base, example heuristic
-                    $factor = min(1.0, $totalChance / 100000); // bigger change, lower buy price / higher sell price
+                    $factor = min(1.0, $totalChance / 100000);
 
-                    if ($baseBuy !== null) {
-                        $suggestedBuy = (int) round($baseBuy * (1.0 - 0.3 * $factor));
-                        $suggestedBuy = $baseBuy !== null ? $this->roundPrice((int) round($suggestedBuy)) : null;
-                    } else {
-                        $suggestedBuy = $baseBuy;
-                    }
+                    $suggestedBuy = $baseBuy !== null
+                        ? $this->roundPrice((int) round($baseBuy * (1.0 - 0.3 * $factor)))
+                        : null;
 
-                    if ($baseSell !== null) {
-                        $suggestedSell = (int) round($baseSell * (1.0 + 0.5 * $factor));
-                        $suggestedSell = $baseSell !== null ? $this->roundPrice((int) round($suggestedSell)) : null;
-                    } else {
-                        $suggestedSell = $baseSell;
-                    }
+                    $suggestedSell = $baseSell !== null
+                        ? $this->roundPrice((int) round($baseSell * (1.0 + 0.5 * $factor)))
+                        : null;
 
                     $result[$itemName][$city] = [
-                        'buy' => $suggestedBuy,
+                        'buy'  => $suggestedBuy,
                         'sell' => $suggestedSell,
                     ];
                 } else {
-                    // does not exist - use base tibia prices
+                    // no local loot → keep baseline as-is (including nulls if unknown)
                     $result[$itemName][$city] = [
-                        'buy' => $baseBuy,
+                        'buy'  => $baseBuy,
                         'sell' => $baseSell,
                     ];
                 }
-
-
             }
         }
 
@@ -117,6 +116,141 @@ readonly class PriceSuggestionEngine
         }
 
         return null;
+    }
+
+    /**
+     * @param string|null $value
+     * @return int|null
+     */
+    private function parsePriceFieldFlexible(?string $value): ?int
+    {
+        if ($value === null || trim($value) === '') {
+            return null;
+        }
+
+        // Try decode JSON of format {"Thais":[85,85], "Carlin":[85]}
+        $decoded = json_decode($value, true);
+        if (is_array($decoded)) {
+            // Flatten all prices into one array
+            $allPrices = [];
+            foreach ($decoded as $prices) {
+                if (is_array($prices)) {
+                    $allPrices = array_merge($allPrices, $prices);
+                }
+            }
+            if (!empty($allPrices)) {
+                // Pick the most frequent price
+                $counts = array_count_values($allPrices);
+                arsort($counts);
+                return (int) array_key_first($counts);
+            }
+            return null;
+        }
+
+        // Fallback: old parsing logic
+        return $this->parsePriceField($value);
+    }
+
+    /**
+     * Parse per-city prices from JSON column: {"Carlin":[240,240], "Thais":[240,25], ...}
+     *
+     * @param string|null $json
+     * @return array<string, int[]>  Map city => list of prices
+     */
+    private function parseCityPriceJson(?string $json): array
+    {
+        if ($json === null || trim($json) === '') {
+            return [];
+        }
+        $data = json_decode($json, true);
+        if (!is_array($data)) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($data as $city => $values) {
+            if (!is_array($values)) {
+                continue;
+            }
+            // keep only numeric ints
+            $intVals = [];
+            foreach ($values as $v) {
+                if (is_numeric($v)) {
+                    $intVals[] = (int)$v;
+                }
+            }
+            if ($intVals) {
+                $result[(string)$city] = $intVals;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Pick a single baseline price from a list using:
+     *  - mode (most frequent),
+     *  - if tie: median of the full list,
+     *  - if still ambiguous: tie-break (lower for "sell", higher for "buy").
+     *
+     * @param int[] $values
+     * @param 'buy'|'sell' $type
+     * @return int|null
+     */
+    private function chooseDominantPrice(array $values, string $type): ?int
+    {
+        if (empty($values)) {
+            return null;
+        }
+
+        // Mode
+        $freq = array_count_values($values);
+        arsort($freq); // by count desc, then by value asc
+        $topCount = reset($freq);
+        $candidates = array_keys(array_filter($freq, fn($c) => $c === $topCount)); // price candidates
+
+        if (count($candidates) === 1) {
+            return (int)$candidates[0];
+        }
+
+        // Median of full set
+        sort($values);
+        $n = count($values);
+        $median = ($n % 2)
+            ? $values[(int) floor($n / 2)]
+            : (int) round(($values[$n/2 - 1] + $values[$n/2]) / 2);
+
+        if (in_array($median, $candidates, true)) {
+            return (int)$median;
+        }
+
+        // Final tie-break:
+        // - For SELL we prefer the LOWER candidate (more conservative payout to player)
+        // - For BUY  we prefer the HIGHER candidate (more conservative cost)
+        return $type === 'sell'
+            ? (int) min($candidates)
+            : (int) max($candidates);
+    }
+
+    /**
+     * Resolve baseline price for a given city:
+     *  - Prefer per-city list (JSON) -> chooseDominantPrice(...)
+     *  - Fallback to scalar Tibia price (parsed by parsePriceField)
+     *
+     * @param array<string,int[]> $perCityPrices
+     * @param string $city
+     * @param 'buy'|'sell' $type
+     * @param int|null $scalarFallback
+     * @return int|null
+     */
+    private function getBaselinePriceForCity(array $perCityPrices, string $city, string $type, ?int $scalarFallback): ?int
+    {
+        if (isset($perCityPrices[$city]) && is_array($perCityPrices[$city]) && !empty($perCityPrices[$city])) {
+            $picked = $this->chooseDominantPrice($perCityPrices[$city], $type);
+            if ($picked !== null) {
+                return $picked;
+            }
+        }
+        return $scalarFallback;
     }
 
     /**

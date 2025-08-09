@@ -41,8 +41,11 @@ class TibiaWikiDataScrapper
             $html = $this->fetchPage($url);
             $crawler = new Crawler($html);
 
-            $sell = $this->extractPriceRange($crawler, 'Sell To');
-            $buy = $this->extractPriceRange($crawler, 'Buy From');
+            // old logic, returns single value or range: 10-250
+//            $sell = $this->extractPriceRange($crawler, 'Sell To');
+//            $buy = $this->extractPriceRange($crawler, 'Buy From');
+            $sell = json_encode($this->extractPricePerCity($crawler, 'Sell To'), JSON_UNESCAPED_UNICODE);
+            $buy  = json_encode($this->extractPricePerCity($crawler, 'Buy From'), JSON_UNESCAPED_UNICODE);
 
             return [
                 'image' => $this->extractItemImage($crawler, $id, $itemName),
@@ -127,6 +130,54 @@ class TibiaWikiDataScrapper
         $max = max($prices);
 
         return $min === $max ? (string)$min : "{$min}-{$max}";
+    }
+
+    /**
+     * Extracts per-city prices as full lists for a given label ("Sell To" or "Buy From").
+     * Example output: ['Carlin' => [240, 240], 'Thais' => [240, 25], ...]
+     *
+     * @param Crawler $crawler
+     * @param 'Sell To'|'Buy From' $label
+     * @return array<string,int[]>
+     */
+    private function extractPricePerCity(Crawler $crawler, string $label): array
+    {
+        $xpathId = $label === 'Sell To' ? 'npc-trade-sellto' : 'npc-trade-buyfrom';
+
+        try {
+            $rows = $crawler->filterXPath("//*[@id='{$xpathId}']//tr");
+        } catch (Throwable $e) {
+            $this->logger->error(
+                sprintf(
+                    'Could not get price data for xpath: %s, error: %s',
+                    "//*[@id='{$xpathId}']//tr",
+                    $e->getMessage()
+                )
+            );
+            return [];
+        }
+
+        $perCity = []; // city => int[]
+        $rows->each(function (Crawler $tr) use (&$perCity) {
+            $tds = $tr->filter('td');
+            if ($tds->count() < 3) {
+                return;
+            }
+
+            $city = trim($tds->eq(1)->text()); // "Location" column
+            $priceText = str_replace([',', ' '], '', trim($tds->eq(2)->text()));
+
+            if ($city === '' || stripos($city, 'Houses and Guildhalls') !== false) {
+                return;
+            }
+
+            if (is_numeric($priceText)) {
+                $perCity[$city] ??= [];
+                $perCity[$city][] = (int)$priceText;
+            }
+        });
+
+        return $perCity;
     }
 
     /**

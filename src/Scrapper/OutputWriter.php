@@ -80,7 +80,11 @@ readonly class OutputWriter
             foreach ($headers as $key) {
                 $cell = $this->columnLetter($colIndex) . $rowNumber;
 
-                if ($key === 'Image' && is_string($row[$key] ?? '') && file_exists($row[$key])) {
+                if ($key === 'Image' &&
+                    isset($row[$key]) &&
+                    is_string($row[$key] ?? '') &&
+                    file_exists($row[$key])
+                ) {
                     $drawing = new Drawing();
                     $drawing->setPath($row[$key]);
                     $drawing->setCoordinates($cell);
