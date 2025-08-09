@@ -71,7 +71,7 @@ class SuggestPricesCommand extends AbstractCommand
         $format = strtolower($input->getOption('format'));
         $equipmentPath = $equipmentFile . '.' . $format;
 
-        // Load data
+        $logger = $this->getLogger($input, 'price_engine');
         $lootReader = new MonsterLootCsvReader();
         $spawnReader = new SpawnCsvReader();
 
@@ -86,7 +86,7 @@ class SuggestPricesCommand extends AbstractCommand
         $equipmentData = $equipmentReader->read($equipmentPath);
 
         // Generate price suggestions
-        $engine = new PriceSuggestionEngine();
+        $engine = new PriceSuggestionEngine($logger);
         $suggestions = $engine->suggestPrices($spawnData, $equipmentData, $lootData);
 
         // Update rows

@@ -164,6 +164,7 @@ class TibiaWikiDataScrapper
                 return;
             }
 
+            $npcName = $tds->eq(0)->text();
             $city = trim($tds->eq(1)->text()); // "Location" column
             $priceText = str_replace([',', ' '], '', trim($tds->eq(2)->text()));
 
@@ -173,7 +174,7 @@ class TibiaWikiDataScrapper
 
             if (is_numeric($priceText)) {
                 $perCity[$city] ??= [];
-                $perCity[$city][] = (int)$priceText;
+                $perCity[$city][preg_replace('/[0-9]+/', '', $npcName)] = (int)$priceText;
             }
         });
 

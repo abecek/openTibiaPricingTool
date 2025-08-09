@@ -5,9 +5,20 @@ namespace App\Pricing;
 
 use App\MonsterLoot\DTO\MonsterLoot;
 use App\SpawnAnalyzer\DTO\MonsterCount;
+use Psr\Log\LoggerInterface;
 
 readonly class PriceSuggestionEngine
 {
+    private const array EXCLUDED_NPCS = ['Rashid'];
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function __construct(
+        private LoggerInterface $logger
+    ) {
+    }
+
     /**
      * @param MonsterCount[] $spawnData
      * @param array<int, array<string, string>> $csvItems
@@ -135,6 +146,15 @@ readonly class PriceSuggestionEngine
             $allPrices = [];
             foreach ($decoded as $prices) {
                 if (is_array($prices)) {
+                    foreach ($prices as $npcName => $v) {
+                        if (in_array($npcName, self::EXCLUDED_NPCS)) {
+                            $this->logger->debug(
+                                sprintf('Unset price from/for npc: %s', $npcName)
+                            );
+                            unset($prices[$npcName]);
+                        }
+                    }
+
                     $allPrices = array_merge($allPrices, $prices);
                 }
             }
@@ -174,7 +194,13 @@ readonly class PriceSuggestionEngine
             }
             // keep only numeric ints
             $intVals = [];
-            foreach ($values as $v) {
+            foreach ($values as $npcName => $v) {
+                if (in_array($npcName, self::EXCLUDED_NPCS)) {
+                    $this->logger->debug(
+                        sprintf('Skipped price from/for npc: %s', $npcName)
+                    );
+                    continue;
+                }
                 if (is_numeric($v)) {
                     $intVals[] = (int)$v;
                 }
