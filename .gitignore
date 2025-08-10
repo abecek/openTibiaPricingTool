@@ -4,6 +4,8 @@ logs/
 images/
 data/input/spawns/
 data/input/items.xml
+data/input/itemsWorkFile.csv
+data/input/itemsWorkFile-small.csv
 data/output/
 *.log
 composer.lock

@@ -28,8 +28,8 @@ class GenerateMerchantItemsCommand extends Command
                 'equipment-file',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Path to workCopyEquipment_extended.csv/xlsx',
-                'data/output/workCopyEquipment_extended.csv'
+                'Path to itemsWorkFile_extended.csv/xlsx',
+                'data/output/itemsWorkFile_extended.csv'
             )
             ->addOption(
                 'format',

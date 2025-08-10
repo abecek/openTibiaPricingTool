@@ -29,14 +29,14 @@ class UpdateDataCommand extends AbstractCommand
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Path to input CSV file',
-                'data/input/workCopyEquipment.csv'
+                'data/input/itemsWorkFile.csv'
             )
             ->addOption(
                 'output',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Output file name',
-                'data/output/workCopyEquipment_extended'
+                'data/output/itemsWorkFile_extended'
             )
             ->addOption(
                 'format',

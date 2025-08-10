@@ -27,7 +27,7 @@ class SuggestPricesCommand extends AbstractCommand
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'Path to previously prepared by UpdateDataCommand file',
-                'data/output/workCopyEquipment_extended'
+                'data/output/itemsWorkFile_extended'
             )
             ->addOption(
                 'format',

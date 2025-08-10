@@ -6,7 +6,7 @@ namespace App\Pricing;
 use RuntimeException;
 
 /**
- * Robust CSV reader for workCopyEquipment_extended.csv
+ * Robust CSV reader for itemsWorkFile_extended.csv
  *
  * - Normalizes headers (trim, lowercase, collapse spaces, strip BOM).
  * - Maps common alias headers to canonical names (Buy, Sell, weaponType, slotType, etc.).

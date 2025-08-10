@@ -4,6 +4,7 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
+use App\Command\ExtractEquipmentItemsCommand;
 use App\Command\AnalyzeSpawnsCommand;
 use App\Command\UpdateDataCommand;
 use App\Command\LoadMonsterLootCommand;
@@ -13,6 +14,7 @@ use App\Command\GenerateMerchantItemsCommand;
 $application = new Application('Tibia Data Tool CLI', '1.0');
 
 // Register commands
+$application->add(new ExtractEquipmentItemsCommand());
 $application->add(new AnalyzeSpawnsCommand());
 $application->add(new UpdateDataCommand());
 $application->add(new LoadMonsterLootCommand());

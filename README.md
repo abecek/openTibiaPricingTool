@@ -7,6 +7,35 @@ Fetches NPC buy/sell prices, required level, item images, integrates spawn monst
 
 ## 🚀 Features
 
+### 🗂 Extract Equipment from Items XML (`extract:items-xml`)
+
+Command for extracting equipment item definitions from a **TFS `items.xml`** file into a **normalized CSV** with a fixed column order and additional fields required by other tools in this suite.
+
+#### Features
+
+- **Input**:
+  - TFS `items.xml` file (as used in `data/input/items.xml`)
+- **Output**:
+  - CSV file with **canonical header order** (semicolon-separated)
+  - Additional columns injected:
+    - `Url`
+    - `Level`
+    - `Tibia Buy Price`
+    - `Tibia Sell Price`
+    - `Is Missing Tibia source`
+    - `Buy`
+    - `Sell`
+    - `LootFrom`
+- **Default values**:
+  - `Url` → `https://tibia.fandom.com/wiki/{Item_Name}`
+  - `Level` → `0`
+  - JSON-like columns (`Tibia Buy Price`, `Tibia Sell Price`, `Buy`, `Sell`, `LootFrom`) → `[]`
+  - `Image` → `images/{name}.gif` (lowercase) when `--guess-image` is used
+- **Filtering**:
+  - By default, exports only items with `slotType` **or** `weaponType` defined
+
+---
+
 ### Item Data Scraper (`update:data`)
 - Symfony Console CLI command: `update:data`
 - Scrapes data from TibiaWiki for each item:
@@ -156,17 +185,34 @@ composer install
 
 ## 🧪 Usage Examples
 
-### Item Data Scraper
+### 1. Extract Equipment from Items XML
+
+```bash
+php console extract:items-xml \
+  --input-xml=data/input/items.xml \
+  --output-csv=data/input/itemsWorkFile.csv \
+  --debug
+``` 
+
+### 2. Item Data Scraper
 
 ```bash
 php console update:data \
-  --input=data/input/workCopyEquipment.csv \
-  --output=data/output/workCopyEquipment_extended \
+  --input=data/input/itemsWorkFile.csv \
+  --output=data/output/itemsWorkFile_extended \
+  --format=csv \
+  --debug
+```
+
+```bash
+php console update:data \
+  --input=data/input/itemsWorkFile.csv \
+  --output=data/output/itemsWorkFile_extended \
   --format=xlsx \
   --debug
 ```
 
-### Spawn Analyzer
+### 3. Spawn Analyzer
 
 ```bash
 php console analyze:spawns \
@@ -175,7 +221,7 @@ php console analyze:spawns \
   --debug
 ```
 
-### Monster Loot Loader
+### 4. Monster Loot Loader
 
 ```bash
 php console monster:load-loot \
@@ -196,7 +242,7 @@ php console monster:load-loot \
   --loot-output="data/output/monster_loot_output.csv"
 ```
 
-### Custom Price Suggester
+### 4. Custom Price Suggester
 
 ```bash
 php console suggest:prices \
@@ -204,21 +250,20 @@ php console suggest:prices \
   --debug 
 ```
 
-### Npc Merchant System Data Populator
+### 6. Npc Merchant System Data Populator
 
 ### CSV
 ```bash
 php console merchant:generate-items \
-  --equipment-file=data/output/workCopyEquipment_extended.csv \
+  --equipment-file=data/output/itemsWorkFile_extended.csv \
   --format=csv \
-  --dst-dir=data/lib/core/customs/merchant/items \
-  --include-tibia-lists
+  --dst-dir=data/lib/core/customs/merchant/items
 ```
 
 ### XLSX
 ```bash
 php console merchant:generate-items \
-  --equipment-file=data/output/workCopyEquipment_extended.xlsx \
+  --equipment-file=data/output/itemsWorkFile_extended.xlsx \
   --format=xlsx \
   --dst-dir=data/lib/core/customs/merchant/items
 ```
@@ -226,7 +271,7 @@ php console merchant:generate-items \
 E.g.
 ```bash
 php console merchant:generate-items \
-  --equipment-file=data/output/workCopyEquipment_extended.csv \
+  --equipment-file=data/output/itemsWorkFile_extended.csv \
   --format=csv \
   --dst-dir="C:\otsDev\TFS-1.5-Downgrades-8.60-upgrade\data\lib\core\customs\merchant\items" \
   --debug
@@ -234,7 +279,7 @@ php console merchant:generate-items \
 
 ```bash
 php console merchant:generate-items \
-  --equipment-file=data/output/workCopyEquipment_extended.xlsx \
+  --equipment-file=data/output/itemsWorkFile_extended.xlsx \
   --format=xlsx \
   --dst-dir="C:\otsDev\TFS-1.5-Downgrades-8.60-upgrade\data\lib\core\customs\merchant\items" \
   --debug
@@ -314,7 +359,8 @@ id;name;Image;slotType;weaponType;Url;Level;Tibia Buy Price;Tibia Sell Price;Is 
 ├─ data/
 │   ├─ input/
 │   │    ├─ items.xml
-│   │    ├─ workCopyEquipment.csv
+│   │    ├─ itemsWorkFile.csv
+│   │    ├─ itemsWorkFile-small.csv
 │   │    └─ spawns/test3-860-spawn.xml
 │   └─ output/
 ├─ logs/

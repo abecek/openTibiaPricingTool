@@ -6,7 +6,7 @@ namespace App\Pricing;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 /**
- * Robust XLSX reader for workCopyEquipment_extended.xlsx
+ * Robust XLSX reader for itemsWorkFile_extended.xlsx
  *
  * - Normalizes headers (trim, lowercase, collapse spaces, strip BOM).
  * - Maps common alias headers to canonical names (Buy, Sell, weaponType, slotType, etc.).

@@ -25,6 +25,13 @@ class LoadMonsterLootCommand extends AbstractCommand
     {
         $this
             ->addOption(
+                'items-file',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Path to items.xml file',
+                'data/input/items.xml'
+            )
+            ->addOption(
                 'monster-dir',
                 null,
                 InputOption::VALUE_REQUIRED,
@@ -61,6 +68,7 @@ class LoadMonsterLootCommand extends AbstractCommand
     {
         $logger = $this->getLogger($input, 'monster_loot');
 
+        $itemsXmlPath = $input->getOption('items-file');
         $monsterDir = $input->getOption('monster-dir');
         $csvPath = $input->getOption('spawn-csv');
         $lootOutput = $input->getOption('loot-output');
@@ -93,7 +101,7 @@ class LoadMonsterLootCommand extends AbstractCommand
         $result = $integrator->integrate($provider, $spawnData);
 
         // 5. Print results to screen
-        $itemLookup = new ItemLookupService('data/input/items.xml');
+        $itemLookup = new ItemLookupService($itemsXmlPath);
         foreach ($result as $city => $monsters) {
             $output->writeln("<info>City: $city</info>");
             foreach ($monsters as $monster => $loot) {

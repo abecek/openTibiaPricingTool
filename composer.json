@@ -13,7 +13,8 @@
         "symfony/console": "^6.0",
         "monolog/monolog": "^3.0",
         "phpoffice/phpspreadsheet": "^4.5",
-        "ext-simplexml": "*"
+        "ext-simplexml": "*",
+        "ext-dom": "*"
     },
     "minimum-stability": "stable",
     "config": {
