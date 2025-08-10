@@ -118,6 +118,8 @@ class GenerateMerchantItemsCommand extends Command
                 'ammunition' => 0, 'distance' => 0, 'bow' => 0, 'crossbow' => 0, 'spear' => 0, 'throwing' => 0,
             ],
             'wands' => 0,
+            'distance' => 0,
+            'jewelry' => 0,
             'equipment' => 0,
             'empty_buy' => 0,
             'empty_sell' => 0,
@@ -333,17 +335,17 @@ class GenerateMerchantItemsCommand extends Command
     {
         $wt = strtolower($weaponType);
         switch ($wt) {
-            case 'sword':   return 'weapons/swords';
-            case 'axe':     return 'weapons/axes';
-            case 'club':    return 'weapons/clubs';
+            case 'sword':       return 'weapons/swords';
+            case 'axe':         return 'weapons/axes';
+            case 'club':        return 'weapons/clubs';
             case 'ammunition':
             case 'distance':
             case 'bow':
             case 'crossbow':
             case 'spear':
-            case 'throwing':return 'weapons/distance';
+            case 'throwing':    return 'distance';
             case 'wand':
-            case 'rod':     return 'wands';
+            case 'rod':         return 'wands';
         }
         // equipment buckets
         $st = strtolower($slotType ?? '');
