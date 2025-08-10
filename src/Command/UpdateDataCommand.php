@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
+use RuntimeException;
 
 class UpdateDataCommand extends AbstractCommand
 {
@@ -63,6 +64,9 @@ class UpdateDataCommand extends AbstractCommand
         $inputFile = $input->getOption('input');
         $outputFile = $input->getOption('output');
         $format = $input->getOption('format');
+        if (!in_array($format, ['csv', 'xlsx'])) {
+            throw new RuntimeException('Invalid format, accepted values are csv, xlsx');
+        }
 
         $outputFileName = $outputFile . '.' . $format;
 

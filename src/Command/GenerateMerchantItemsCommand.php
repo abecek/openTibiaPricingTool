@@ -101,8 +101,10 @@ class GenerateMerchantItemsCommand extends Command
         }
 
         // Partition & warnings & stats
-        $weapons = [];
         $wands = [];
+        $weapons = [];
+        $distance = [];
+        $jewelry = [];
         $equip = [];
 
         $warnings = [];
@@ -110,8 +112,10 @@ class GenerateMerchantItemsCommand extends Command
             'total' => 0,
             'weapons' => 0,
             'weapons_by_type' => [
-                'sword' => 0, 'axe' => 0, 'club' => 0,
-                'distance' => 0, 'bow' => 0, 'crossbow' => 0, 'spear' => 0, 'throwing' => 0,
+                'sword' => 0, 'axe' => 0, 'club' => 0
+            ],
+            'distances_by_type' => [
+                'ammunition' => 0, 'distance' => 0, 'bow' => 0, 'crossbow' => 0, 'spear' => 0, 'throwing' => 0,
             ],
             'wands' => 0,
             'equipment' => 0,
@@ -147,8 +151,8 @@ class GenerateMerchantItemsCommand extends Command
                 'slotType' => $slotType ?: null,
                 'group' => $group,
                 'subType' => 0,
-                'buy' => $buyMap ?: new \stdClass(),
-                'sell' => $sellMap ?: new \stdClass(),
+                'buy' => $buyMap ?: new stdClass(),
+                'sell' => $sellMap ?: new stdClass(),
             ];
 
             // route to file + stats
@@ -161,6 +165,15 @@ class GenerateMerchantItemsCommand extends Command
                 if (isset($stats['weapons_by_type'][$weaponType])) {
                     $stats['weapons_by_type'][$weaponType]++;
                 }
+            } elseif ($this->isDistance($weaponType)) {
+                $distance[$id] = $luaItem;
+                $stats['distance']++;
+                if (isset($stats['distances_by_type'][$weaponType])) {
+                    $stats['distances_by_type'][$weaponType]++;
+                }
+            } elseif ($this->isJewelery($slotType)) {
+                $jewelry[$id] = $luaItem;
+                $stats['jewelry']++;
             } else {
                 $equip[$id] = $luaItem;
                 $stats['equipment']++;
@@ -174,6 +187,8 @@ class GenerateMerchantItemsCommand extends Command
         $files = [
             'weapons.lua' => $weapons,
             'wands.lua' => $wands,
+            'distance.lua' => $distance,
+            'jewelry.lua' => $jewelry,
             'equipment.lua' => $equip,
         ];
 
@@ -195,12 +210,15 @@ class GenerateMerchantItemsCommand extends Command
             $output->writeln("  swords:            {$stats['weapons_by_type']['sword']}");
             $output->writeln("  axes:              {$stats['weapons_by_type']['axe']}");
             $output->writeln("  clubs:             {$stats['weapons_by_type']['club']}");
-            $output->writeln("  distance:          {$stats['weapons_by_type']['distance']}");
-            $output->writeln("  bows:              {$stats['weapons_by_type']['bow']}");
-            $output->writeln("  crossbows:         {$stats['weapons_by_type']['crossbow']}");
-            $output->writeln("  spears:            {$stats['weapons_by_type']['spear']}");
-            $output->writeln("  throwing:          {$stats['weapons_by_type']['throwing']}");
             $output->writeln("Wands/Rods:          {$stats['wands']}");
+            $output->writeln("Distance:            {$stats['distance']}");
+            $output->writeln("  ammunition:        {$stats['distances_by_type']['ammunition']}");
+            $output->writeln("  distance:          {$stats['distances_by_type']['distance']}");
+            $output->writeln("  bows:              {$stats['distances_by_type']['bow']}");
+            $output->writeln("  crossbows:         {$stats['distances_by_type']['crossbow']}");
+            $output->writeln("  spears:            {$stats['distances_by_type']['spear']}");
+            $output->writeln("  throwing:          {$stats['distances_by_type']['throwing']}");
+            $output->writeln("Jewelry:             {$stats['jewelry']}");
             $output->writeln("Equipment:           {$stats['equipment']}");
             $output->writeln("Empty Buy JSON:      {$stats['empty_buy']}");
             $output->writeln("Empty Sell JSON:     {$stats['empty_sell']}");
@@ -223,6 +241,8 @@ class GenerateMerchantItemsCommand extends Command
             'counts' => [
                 'weapons'   => count($weapons),
                 'wands'     => count($wands),
+                'distance'  => count($distance),
+                'jewelry'   => count($jewelry),
                 'equipment' => count($equip),
             ],
             'stats' => $stats,
@@ -265,7 +285,17 @@ class GenerateMerchantItemsCommand extends Command
     private function isWeapon(?string $weaponType): bool
     {
         if (!$weaponType) return false;
-        return in_array($weaponType, ['sword','axe','club','distance','bow','crossbow','spear','throwing'], true);
+        return in_array($weaponType, ['sword','axe','club'], true);
+    }
+
+    /**
+     * @param string|null $weaponType
+     * @return bool
+     */
+    private function isDistance(?string $weaponType): bool
+    {
+        if (!$weaponType) return false;
+        return in_array($weaponType, ['ammunition','distance','bow','crossbow','spear','throwing'], true);
     }
 
     /**
@@ -284,6 +314,16 @@ class GenerateMerchantItemsCommand extends Command
     }
 
     /**
+     * @param string|null $slotType
+     * @return bool
+     */
+    private function isJewelery(?string $slotType): bool
+    {
+        if (!$slotType) return false;
+        return in_array($slotType, ['necklace','ring'], true);
+    }
+
+    /**
      * @param string $weaponType
      * @param string $slotType
      * @param array $row
@@ -296,6 +336,7 @@ class GenerateMerchantItemsCommand extends Command
             case 'sword':   return 'weapons/swords';
             case 'axe':     return 'weapons/axes';
             case 'club':    return 'weapons/clubs';
+            case 'ammunition':
             case 'distance':
             case 'bow':
             case 'crossbow':

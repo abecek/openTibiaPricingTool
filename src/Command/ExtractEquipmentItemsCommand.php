@@ -26,6 +26,92 @@ class ExtractEquipmentItemsCommand extends AbstractCommand
 {
     protected static $defaultName = 'extract:items-xml';
 
+    /** @var array Allows to skip items with specific item ids */
+    private const array EXCLUDED_IDS = [ // elemental weapons, equipped rings, etc...
+        2202,
+        2203,
+        2204,
+        2205,
+        2206,
+        2210,
+        2211,
+        2212,
+        2213,
+        2214,
+        2215,
+        2216,
+
+        7744,
+        7745,
+        7746,
+        7747,
+        7748,
+        7749,
+        7750,
+        7751,
+        7752,
+        7753,
+        7754,
+        7755,
+        7756,
+        7757,
+        7758,
+
+        7763,
+        7764,
+        7765,
+        7766,
+        7767,
+        7768,
+        7769,
+        7770,
+        7771,
+        7772,
+        7773,
+        7774,
+        7775,
+        7776,
+        7777,
+
+        7838,
+        7839,
+        7840,
+        7850,
+
+        7854,
+        7855,
+        7856,
+        7857,
+
+        7859,
+        7860,
+        7861,
+        7862,
+        7863,
+
+        7864,
+        7865,
+        7866,
+        7867,
+        7868,
+        7869,
+        7870,
+        7871,
+        7872,
+        7873,
+        7874,
+        7875,
+        7876,
+        7877,
+        7878,
+
+        7879,
+        7880,
+        7881,
+        7882,
+        7883
+    ];
+
     /** Canonical header order for the output CSV. */
     private const ORDERED_HEADERS = [
         'id','name','Image','slotType','weaponType',
@@ -97,8 +183,6 @@ class ExtractEquipmentItemsCommand extends AbstractCommand
         $guessImg = (bool)$input->getOption('guess-image');
         $debug = (bool)$input->getOption('debug');
 
-
-
         if ($xmlPath === '' || !is_file($xmlPath)) {
             throw new RuntimeException("Input XML not found: {$xmlPath}");
         }
@@ -124,12 +208,16 @@ class ExtractEquipmentItemsCommand extends AbstractCommand
         foreach ($itemNodes as $item) {
             $row = array_fill_keys(self::ORDERED_HEADERS, '');
 
-            $id   = trim((string)$item->getAttribute('id'));
+            $id = trim((string)$item->getAttribute('id'));
             $name = trim((string)$item->getAttribute('name'));
             $type = trim((string)$item->getAttribute('type')); // optional in TFS
 
             if ($id === '' || $name === '') {
                 // Skip weird/incomplete entries
+                continue;
+            }
+
+            if (in_array((int) $id, self::EXCLUDED_IDS)) {
                 continue;
             }
 
