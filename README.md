@@ -58,6 +58,92 @@ Fetches NPC buy/sell prices, required level, item images, integrates spawn monst
       - crystal coin (ID: 3043, chance: 200, countMax: 1)
   ```
 
+### 💰 Price Suggestion Engine
+
+A tool for automatically suggesting localized NPC buy/sell prices for items based on monster loot availability around cities.
+
+#### Command (`merchant:suggest-prices`)
+
+- Supports **CSV** and **XLSX** as both input and output formats
+- Uses data from:
+  - Equipment file (`--equipment-csv` or `--equipment-xlsx`)
+  - Monster loot file (`--loot-csv`)
+  - Spawn data file (`--spawn-csv`)
+- Generates **Buy** and **Sell** columns as JSON per city in the following format:
+  ```json
+  {"Agren": 1500, "Estimar": 1550, "Ohara": 1600, "Sacrus": 1500, "Sagvana": 1500}
+  ```
+- If an item is not available in monster loot around a given city, base **Tibia Buy Price** and **Tibia Sell Price** are used (or `null` if missing)
+- Prevents cross-city exploitation:
+  - Ensures no city’s `buy` price is lower than any other city’s `sell` price for the same item
+- Options:
+  - `--equipment-csv` / `--equipment-xlsx` – equipment data source
+  - `--loot-csv` – monster loot data source
+  - `--spawn-csv` – spawn proximity data
+  - `--format` – `csv` or `xlsx` for output
+  - `--debug` – shows detailed processing info
+
+#### Data Sources
+
+1. **Equipment data**  
+   Contains item metadata and base Tibia prices.
+2. **Loot data**  
+   Maps monsters to their loot tables with drop chances.
+3. **Spawn data**  
+   Assigns monsters to their nearest cities (ignoring floor level).
+
+#### Example Output Row
+
+| id   | name           | Tibia Buy Price | Tibia Sell Price | Buy JSON                                                                                      | Sell JSON                                                                                     |
+|------|----------------|-----------------|------------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| 2376 | sword          | 85               | 25               | `{"Agren":85,"Estimar":85,"Ohara":85,"Sacrus":85,"Sagvana":85}`                               | `{"Agren":25,"Estimar":25,"Ohara":25,"Sacrus":25,"Sagvana":25}`                               |
+| 2195 | boots of haste | 30000            | 9000              | `{"Agren":29500,"Estimar":30000,"Ohara":30000,"Sacrus":30000,"Sagvana":30000}`               | `{"Agren":9000,"Estimar":9000,"Ohara":9000,"Sacrus":9000,"Sagvana":9000}`                     |
+
+---
+
+**Note:**  
+The Price Suggestion Engine should be run **after** loot data and spawn data are up-to-date to ensure price suggestions reflect the current in-game economy.
+
+### 🛒 Merchant System (NPC Traders)
+
+A new module for automatically generating merchant data in Lua format, ready to be loaded in TFS.
+
+#### Generation Command (`merchant:generate-items`)
+
+- Supports **CSV** and **XLSX** input formats
+- Generates Lua files per category (e.g., `weapons.lua`, `wands.lua`, `equipment.lua`) based on the following columns:
+  - `id`, `name`, `slotType`, `weaponType`, `group`
+  - `Buy` (JSON), `Sell` (JSON)
+- **Buy** and **Sell** are converted into Lua tables with proper indentation
+- Supported options:
+  - `--equipment-file` – source CSV/XLSX file
+  - `--format` – `csv` or `xlsx`
+  - `--dst-dir` – target directory (`items/`)
+  - `--include-tibia-lists` – includes `tibiaBuy` / `tibiaSell` lists (optional)
+  - `--debug` – displays detailed statistics
+- Data validation:
+  - Checks for required columns (`id`, `name`, `Buy`, `Sell`)
+  - Validates JSON in `Buy` and `Sell` columns
+  - Can abort the process if validation fails
+- With `--debug` enabled, prints statistics:
+  - Total number of generated items
+  - Count per category (`swords`, `axes`, `bows`, etc.)
+
+#### Format of Generated `items/*.lua` Files
+
+Each Lua file contains a local `ITEMS` table:
+
+```lua
+  local ITEMS = {
+      [2181] = { id = 2181, name = "terra rod", slotType = nil, group = "wands", subType = 0,
+          buy  = { Agren = 10000, Estimar = 8950, Ohara = 9750, Sacrus = 10000, Sagvana = 10000 },
+          sell = { Agren = 2000,  Estimar = 2350, Ohara = 2100, Sacrus = 2000,  Sagvana = 2000 }
+      },
+      -- more items...
+  }
+  return ITEMS
+```
+
 ---
 
 ## 📦 Installation
@@ -120,7 +206,7 @@ php console suggest:prices \
 
 ### Npc Merchant System Data Populator
 
-# CSV
+### CSV
 ```bash
 php console merchant:generate-items \
   --equipment-file=data/output/workCopyEquipment_extended.csv \
@@ -129,7 +215,7 @@ php console merchant:generate-items \
   --include-tibia-lists
 ```
 
-# XLSX
+### XLSX
 ```bash
 php console merchant:generate-items \
   --equipment-file=data/output/workCopyEquipment_extended.xlsx \
@@ -175,36 +261,56 @@ id;name;Image;slotType;weaponType;Url;Level;Tibia Buy Price;Tibia Sell Price;Is 
 
 ```
 ├─ src/
-│   ├─ Command/
-│   │    ├─ AbstractCommand.php
-│   │    ├─ AnalyzeSpawnsCommand.php
-│   │    ├─ LoadMonsterLootCommand.php
-│   │    └─ UpdateDataCommand.php
-│   ├─ Scrapper/
-│   │    ├─ TibiaItemDataUpdater.php
-│   │    ├─ TibiaWikiDataScrapper.php
-│   │    ├─ UrlBuilder.php
-│   │    └─ OutputWriter.php
-│   ├─ SpawnAnalyzer/
-│   │    ├─ CityRegistry.php
-│   │    ├─ MonsterProximityAnalyzer.php
-│   │    ├─ SpawnCsvReader.php
-│   │    ├─ SpawnParser.php
-│   │    ├─ Writer/
-│   │    │     └─ SpawnAnalysisCsvWriter.php
-│   │    └─ DTO/
-│   │          ├─ City.php
-│   │          ├─ MonsterCount.php
-│   │          └─ SpawnEntry.php
-│   ├─ Item/
-│   │    └─ ItemLookupService.php
-│   ├─ MonsterLoot/
-│   │    ├─ DTO/
-│   │    │     ├─ LootItem.php
-│   │    │     └─ MonsterLoot.php
-│   │    ├─ MonsterDataProvider.php
-│   │    ├─ MonsterLootLoader.php
-│   │    └─ SpawnLootIntegrator.php
+│   ├── Command/
+│   │   ├── AbstractCommand.php
+│   │   ├── AnalyzeSpawnsCommand.php
+│   │   ├── GenerateMerchantItemsCommand.php
+│   │   ├── LoadMonsterLootCommand.php
+│   │   ├── SuggestPricesCommand.php
+│   │   └── UpdateDataCommand.php
+│   │
+│   ├── Item/
+│   │   └── ItemLookupService.php
+│   │
+│   ├── Merchant/
+│   │   ├── LuaTableDumper.php
+│   │   └── MerchantDataValidator.php
+│   │
+│   ├── MonsterLoot/
+│   │   ├── DTO/
+│   │   │   ├── LootItem.php
+│   │   │   └── MonsterLoot.php
+│   │   ├── Writer/
+│   │   │   └── MonsterLootCsvWriter.php
+│   │   ├── MonsterDataProvider.php
+│   │   ├── MonsterLootCsvReader.php
+│   │   ├── MonsterLootLoader.php
+│   │   └── SpawnLootIntegrator.php
+│   │
+│   ├── Pricing/
+│   │   ├── EquipmentCsvReader.php
+│   │   ├── EquipmentXlsxReader.php
+│   │   ├── EquipmentXlsxUpdater.php
+│   │   └── PriceSuggestionEngine.php
+│   │
+│   ├── Scrapper/
+│   │   ├── OutputWriter.php
+│   │   ├── TibiaItemDataUpdater.php
+│   │   ├── TibiaWikiDataScrapper.php
+│   │   └── UrlBuilder.php
+│   │
+│   └── SpawnAnalyzer/
+│   ├── DTO/
+│   │   ├── City.php
+│   │   ├── MonsterCount.php
+│   │   └── SpawnEntry.php
+│   ├── Writer/
+│   │   └── SpawnAnalysisCsvWriter.php
+│   ├── CityRegistry.php
+│   ├── MonsterProximityAnalyzer.php
+│   ├── SpawnCsvReader.php
+│   └── SpawnParser.php
+│
 ├─ data/
 │   ├─ input/
 │   │    ├─ items.xml
@@ -247,9 +353,6 @@ When `--debug` is enabled:
 
 ## 🔧 Possible Enhancements
 
-- Export monster analysis to XLSX
-- Export integrated loot to structured file
-- Price suggestion engine per city
 - Web interface or dashboard
 
 ---

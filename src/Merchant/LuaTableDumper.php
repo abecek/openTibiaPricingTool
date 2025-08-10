@@ -9,11 +9,9 @@ final class LuaTableDumper
 {
     /**
      * Dump any PHP value to a Lua literal.
-     * - Arrays (assoc) => { [key]=value, ... }
-     * - Arrays (seq 1..n) => { v1, v2, ... }
-     * - stdClass (empty) => {}
-     * - stdClass (with props) => treat as assoc
-     * - Scalars => numbers/strings/bool/nil
+     * Keep generic behavior, but for item metas (arrays containing 'buy' or 'sell')
+     * print 'buy' and 'sell' on separate indented lines, while the primary fields
+     * (id, name, slotType, group, subType) are kept inline on the opening line.
      *
      * @param mixed $value
      * @param int $level
@@ -21,14 +19,8 @@ final class LuaTableDumper
      */
     public static function dump(mixed $value, int $level = 0): string
     {
-        // Handle stdClass specially (often used to force {} instead of [])
         if ($value instanceof stdClass) {
-            $vars = get_object_vars($value);
-            if (empty($vars)) {
-                return '{}';
-            }
-            // fallthrough as associative array
-            $value = $vars;
+            $value = get_object_vars($value);
         }
 
         if (is_array($value)) {
@@ -45,24 +37,66 @@ final class LuaTableDumper
      */
     private static function dumpArray(array $arr, int $level): string
     {
+        // Empty array -> {}
         if ($arr === []) {
             return '{}';
         }
 
-        $indent = str_repeat('    ', $level);
-        $nextIndent = str_repeat('    ', $level + 1);
+        $indent      = str_repeat('    ', $level);
+        $nextIndent  = str_repeat('    ', $level + 1);
 
         $assoc = self::isAssoc($arr);
 
+        // Special formatting for item metas (have 'buy' or 'sell' keys)
+        if ($assoc && self::looksLikeItemMeta($arr)) {
+            // Prepare inline head (id, name, slotType, group, subType)
+            $headKeys = ['id', 'name', 'slotType', 'group', 'subType'];
+            $inlineParts = [];
+            $restLines   = [];
+
+            foreach ($headKeys as $hk) {
+                if (array_key_exists($hk, $arr)) {
+                    $inlineParts[] = $hk . ' = ' . self::dump($arr[$hk], 0);
+                    unset($arr[$hk]);
+                }
+            }
+
+            // build buy/sell lines if present
+            foreach (['buy', 'sell'] as $bs) {
+                if (array_key_exists($bs, $arr)) {
+                    $restLines[] = $nextIndent . $bs . ' = ' . self::formatInlineAssoc($arr[$bs]);
+                    unset($arr[$bs]);
+                }
+            }
+
+            // Any other remaining keys: generic formatting, one per line
+            if (!empty($arr)) {
+                ksort($arr);
+                foreach ($arr as $k => $v) {
+                    $restLines[] = $nextIndent . self::formatKey($k) . ' = ' . self::dump($v, $level + 1);
+                }
+            }
+
+            // Compose
+            $out = '{ ';
+            if (!empty($inlineParts)) {
+                $out .= implode(', ', $inlineParts);
+            }
+            if (!empty($restLines)) {
+                $out .= ",\n" . implode(",\n", $restLines) . "\n" . $indent . '}';
+            } else {
+                $out .= ' }';
+            }
+            return $out;
+        }
+
+        // Generic formatting
         $parts = [];
         if ($assoc) {
             foreach ($arr as $k => $v) {
-                $key = self::formatKey($k);
-                $val = self::dump($v, $level + 1);
-                $parts[] = "{$nextIndent}{$key} = {$val}";
+                $parts[] = "{$nextIndent}" . self::formatKey($k) . ' = ' . self::dump($v, $level + 1);
             }
         } else {
-            // sequential (1..n)
             foreach ($arr as $v) {
                 $parts[] = "{$nextIndent}" . self::dump($v, $level + 1);
             }
@@ -72,58 +106,87 @@ final class LuaTableDumper
     }
 
     /**
+     * Heuristic: array that has 'buy' or 'sell' is considered an item meta
+     *
+     * @param array $arr
+     * @return bool
+     */
+    private static function looksLikeItemMeta(array $arr): bool
+    {
+        return array_key_exists('buy', $arr) || array_key_exists('sell', $arr);
+    }
+
+    /**
+     * Format associative array inline: { Key1 = Val1, Key2 = Val2, ... }
+     *
+     * @param mixed $value
+     * @return string
+     */
+    private static function formatInlineAssoc(mixed $value): string
+    {
+        if ($value instanceof stdClass) {
+            $value = get_object_vars($value);
+        }
+        if (!is_array($value) || $value === []) {
+            return '{}';
+        }
+        $arr = $value;
+        ksort($arr);
+        $pairs = [];
+        foreach ($arr as $k => $v) {
+            $pairs[] = self::formatLuaKeyInline($k) . ' = ' . self::dump($v, 0);
+        }
+        return '{ ' . implode(', ', $pairs) . ' }';
+    }
+
+    /**
      * @param array $arr
      * @return bool
      */
     private static function isAssoc(array $arr): bool
     {
-        // Sequential if keys are exactly 0..n-1 or 1..n
         if ($arr === []) {
             return false;
         }
         $keys = array_keys($arr);
 
-        // Allow 1-based sequences (Lua-like) as sequential
+        // Allow 1-based sequences (Lua-like)
         $isOneBased = ($keys[0] === 1);
         if ($isOneBased) {
             $n = count($keys);
             for ($i = 1; $i <= $n; $i++) {
-                if ($keys[$i - 1] !== $i) return true; // not sequential
+                if ($keys[$i - 1] !== $i) return true;
             }
-            return false; // sequential 1..n
+            return false;
         }
 
-        // Allow 0-based too (common in PHP)
+        // Allow 0-based sequences (PHP-like)
         $isZeroBased = ($keys[0] === 0);
         if ($isZeroBased) {
             $n = count($keys);
             for ($i = 0; $i < $n; $i++) {
-                if ($keys[$i] !== $i) return true; // not sequential
+                if ($keys[$i] !== $i) return true;
             }
-            return false; // sequential 0..n-1
+            return false;
         }
 
-        return true; // anything else is associative
+        return true;
     }
 
     /**
      * @param string|int $key
      * @return string
      */
-    private static function formatKey($key): string
+    private static function formatKey(mixed$key): string
     {
         if (is_int($key)) {
             return '[' . $key . ']';
         }
-
-        // Lua identifier?
-        if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $key)) {
-            // bareword key is fine: key = value
-            return $key;
+        $s = (string)$key;
+        if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $s)) {
+            return $s;
         }
-
-        // Otherwise use ["..."] quoting
-        return '["' . self::escapeString((string)$key) . '"]';
+        return '["' . self::escapeString($s) . '"]';
     }
 
     /**
@@ -136,11 +199,25 @@ final class LuaTableDumper
         if ($v === true)   return 'true';
         if ($v === false)  return 'false';
         if (is_int($v) || is_float($v)) {
-            // Keep numeric literal as-is
             return (string)$v;
         }
-        // strings (and everything else)
         return '"' . self::escapeString((string)$v) . '"';
+    }
+
+    /**
+     * @param mixed $key
+     * @return string
+     */
+    private static function formatLuaKeyInline(mixed $key): string
+    {
+        if (is_int($key)) {
+            return '[' . $key . ']';
+        }
+        $s = (string)$key;
+        if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $s)) {
+            return $s;
+        }
+        return '["' . self::escapeString($s) . '"]';
     }
 
     /**
@@ -149,7 +226,10 @@ final class LuaTableDumper
      */
     private static function escapeString(string $s): string
     {
-        // Basic escapes for Lua
-        return str_replace(["\\", "\"", "\r", "\n", "\t"], ["\\\\", "\\\"", "\\r", "\\n", "\\t"], $s);
+        return str_replace(
+            ["\\", "\"", "\r", "\n", "\t"],
+            ["\\\\", "\\\"", "\\r", "\\n", "\\t"],
+            $s
+        );
     }
 }
