@@ -6,14 +6,15 @@ namespace App\Scrapper;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use RuntimeException;
 
-class OutputWriter
+readonly class OutputWriter
 {
     /**
      * @param string $format
      */
     public function __construct(
-        private readonly string $format = 'csv'
+        private string $format = 'csv'
     ) {
     }
 
@@ -27,7 +28,7 @@ class OutputWriter
     public function write(array $items, string $outputPath): void
     {
         if (empty($items)) {
-            throw new \RuntimeException("No data to write.");
+            throw new RuntimeException("No data to write.");
         }
 
         if ($this->format === 'xlsx') {
@@ -45,7 +46,7 @@ class OutputWriter
         $fp = fopen($outputPath, 'w');
 
         if (!$fp) {
-            throw new \RuntimeException("Unable to open file for writing: " . $outputPath);
+            throw new RuntimeException("Unable to open file for writing: " . $outputPath);
         }
 
         // Write headers
@@ -79,7 +80,11 @@ class OutputWriter
             foreach ($headers as $key) {
                 $cell = $this->columnLetter($colIndex) . $rowNumber;
 
-                if ($key === 'Image' && is_string($row[$key] ?? '') && file_exists($row[$key])) {
+                if ($key === 'Image' &&
+                    isset($row[$key]) &&
+                    is_string($row[$key] ?? '') &&
+                    file_exists($row[$key])
+                ) {
                     $drawing = new Drawing();
                     $drawing->setPath($row[$key]);
                     $drawing->setCoordinates($cell);

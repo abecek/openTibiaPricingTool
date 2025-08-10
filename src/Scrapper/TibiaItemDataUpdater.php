@@ -5,9 +5,12 @@ namespace App\Scrapper;
 
 use GuzzleHttp\Exception\GuzzleException;
 use Monolog\Logger;
+use RuntimeException;
 
 readonly class TibiaItemDataUpdater
 {
+    private const int SLEEP_TIME_MICRO_SECS = 100000;
+
     /**
      * @param string $inputFile
      * @param string $outputFile
@@ -34,7 +37,7 @@ readonly class TibiaItemDataUpdater
     public function run(?callable $onItemProcessed = null): void
     {
         $items = $this->readCsv();
-        $header = array_keys($items[0]);
+        //$header = array_keys($items[0]);
 
         foreach ($items as &$item) {
             $id = $item['id'] ?? '';
@@ -54,9 +57,8 @@ readonly class TibiaItemDataUpdater
             $url = $this->urlBuilder->getUrl($name);
             $data = $this->dataScrapper->fetchData($id, $name, $url);
             $this->logger->debug(sprintf(
-                "Fetched prices, sell: %s, buy: %s",
-                $prices['sell'] ?? 'null',
-                $prices['buy'] ?? 'null'
+                "Fetched data: %s",
+                json_encode($data)
             ));
 
             if (isset($data['failed'])) {
@@ -73,7 +75,7 @@ readonly class TibiaItemDataUpdater
                 $onItemProcessed();
             }
 
-            usleep(300000);
+            usleep(self::SLEEP_TIME_MICRO_SECS);
         }
         unset($item);
 
@@ -92,18 +94,18 @@ readonly class TibiaItemDataUpdater
     private function readCsv(): array
     {
         if (!file_exists($this->inputFile)) {
-            throw new \RuntimeException("File {$this->inputFile} not found.");
+            throw new RuntimeException("File {$this->inputFile} not found.");
         }
 
         $rows = [];
         if (($h = fopen($this->inputFile, 'r')) === false) {
-            throw new \RuntimeException("Could not open CSV for reading.");
+            throw new RuntimeException("Could not open CSV for reading.");
         }
 
         $header = fgetcsv($h, 0, ';');
         if (!$header) {
             fclose($h);
-            throw new \RuntimeException("CSV header is missing or unreadable.");
+            throw new RuntimeException("CSV header is missing or unreadable.");
         }
 
         // Remove BOM if present
@@ -137,26 +139,5 @@ readonly class TibiaItemDataUpdater
 
         fclose($h);
         return $rows;
-    }
-
-    /**
-     * @param array $rows
-     * @param array $header
-     * @return void
-     */
-    private function writeCsv(array $rows, array $header): void
-    {
-        $h = fopen($this->outputFile, 'w');
-        fputcsv($h, $header, ';');
-
-        foreach ($rows as $row) {
-            $line = [];
-            foreach ($header as $key) {
-                $line[] = $row[$key] ?? '';
-            }
-            fputcsv($h, $line, ';');
-        }
-
-        fclose($h);
     }
 }
