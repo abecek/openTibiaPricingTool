@@ -242,7 +242,7 @@ php console monster:load-loot \
   --loot-output="data/output/monster_loot_output.csv"
 ```
 
-### 4. Custom Price Suggester
+### 5. Custom Price Suggester
 
 ```bash
 php console suggest:prices \
